@@ -1,72 +1,38 @@
-#Set-Alias swap ChangeExPolicy
-Set-Alias touch New-File
-Set-Alias ip Get-Ip
-Set-Alias connect connect_to_wifi
-Set-Alias disconnect disconnect_from_wifi
-Set-Alias ds4 C:\Users\Timmy\Documents\DS4Windows\DS4Windows.exe
-Set-Alias run javarun
-Set-Alias push git_push
-Set-Alias search search_history
-Set-Alias init New-NodeApp
-Set-Alias pum  Update-PythonModules
+# Variables
 
-$dev = (Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent
-function New-File { # Write docs
-    param(
-        [Parameter()]
+$dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
+
+# Functions
+
+Set-Alias unlock Get-OfficeKey
+function Get-OfficeKey {
+    Invoke-RestMethod https://massgrave.dev/get | Invoke-Expression;
+}
+
+Set-Alias connect Connect-Wifi
+function Connect-Wifi { # Write docs
+    param (
+        [Parameter(Mandatory)]
         [string]
         $name
     )
-    if($null -eq $name){
-        Write-Output "No name provided"
-    } elseif (Test-Path $name) {
-        Write-Output "File already exists"
-    } else {
-        New-Item -Name $name
-    }   
-}
-function push { # Write docs
-    param(
-        [Parameter(ValueFromRemainingArguments = $true)]
-        [string[]]
-        $message
-    )
-    if($null -eq $message){
-        Write-Output "Message is missing! Please add a message!"
-    } else {
-        git add *
-        git commit -m "$message"
-        git push
+    try {
+        netsh.exe wlan connect $name
+        Write-Output 'Connected to network'
+    }
+    catch {
+        Write-Output 'Err'
     }
 }
-function dev { # Write docs
-    Set-Location $dev
+
+Set-Alias disconnect Disconnect-Wifi
+function Disconnect-Wifi { # Write docs
+    param ()
+    netsh.exe wlan disconnect
 }
-function nighty { # TODO
-    param()
-    python C:\Users\Timmy\Documents\snippets\windows\go_to_bed.py
-}
-function Update-PythonModules { # TODO
-    param()
-    Set-Location C:\dev\scripts
-    ./update_python_modules.ps1
-}
-function Get-Ip { # Write docs
-    param()
-    $out = (ipconfig.exe | findstr.exe 'IPv4')
-    Write-Output ($out | findstr.exe '\.1\.')
-}
-function javarun { # TODO
-    param (
-        [Parameter()]
-            [string]
-            $x
-    )
-    C:\Users\Timmy\Documents\jdk-16\bin\javac.exe $x".java"
-    C:\Users\Timmy\Documents\jdk-16\bin\java.exe $x
-    Remove-Item $x".class";
-}
-function ChangeExPolicy { # Write docs
+
+Set-Alias swap Edit-Policy
+function Edit-Policy { # Write docs
     param (
             [Parameter()]
             [string]
@@ -101,44 +67,71 @@ function ChangeExPolicy { # Write docs
             Write-Output 'Please run terminal as admin or use option -u'
         }
     }
-    
 }
-function connect_to_wifi { # Write docs
+
+Set-Alias key Find-WifiKey
+function Find-WifiKey {
     param (
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]
         $name
     )
-    try {
-        netsh.exe wlan connect $name
-        Write-Output 'Connected to network'
-    }
-    catch {
-        Write-Output 'Err'
+    Invoke-Expression "netsh wlan show profile $($name) key=clear | findstr Key"
+}
+
+Set-Alias ip Get-Ip
+function Get-Ip { # Write docs
+    param()
+    $out = (ipconfig.exe | findstr.exe 'IPv4')
+    Write-Output ($out | findstr.exe '\.1\.')
+}
+
+Set-Alias push Push-Git
+function Push-Git { # Write docs
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]
+        $message
+    )
+    if($null -eq $message){
+        Write-Output "Message is missing! Please add a message!"
+    } else {
+        git add *
+        git commit -m "$message"
+        git push
     }
 }
-function disconnect_from_wifi { # Write docs
-    param ()
-    netsh.exe wlan disconnect
+
+Set-Alias dev Set-LocationDev
+function Set-LocationDev {
+    Set-Location $dev;
+    # Write-Output $dev
+
 }
-function git_push { # Write docs
+
+Set-Alias mongors Set-MongoDBReplicaSet
+function Set-MongoDBReplicaSet {
+    # mongosh.exe --eval db.
+    mongod --replSet rs0 --port 27017 --dbpath "C:\Program Files\MongoDB\Server\6.0\data"
+}
+
+Set-Alias touch New-File
+function New-File { # Write docs
     param(
         [Parameter()]
         [string]
-        $msg
+        $name
     )
-    git add *;
-    git commit -m $msg
-    git push
+    if($null -eq $name){
+        Write-Output "No name provided"
+    } elseif (Test-Path $name) {
+        Write-Output "File already exists"
+    } else {
+        New-Item -Name $name
+    }   
 }
-function search_history { # Write docs
-    param (
-        [Parameter()]
-        [string]
-        $search_text
-    )
-    Get-Content (Get-PSReadlineOption).HistorySavePath | Where-Object { $_ -like "*${search_text}*" }    
-}
+
+Set-Alias init New-NodeApp
 function New-NodeApp {
     <#
     .SYNOPSIS
@@ -207,3 +200,39 @@ function New-NodeApp {
         Write-Output "`nWe are finished here.`nGood luck, Voyager."
     }
 }
+
+Set-Alias run Invoke-JavaProgram
+function Invoke-JavaProgram { # TODO
+    param (
+        [Parameter()]
+            [string]
+            $x
+    )
+    C:\Users\Timmy\Documents\jdk-16\bin\javac.exe $x".java"
+    C:\Users\Timmy\Documents\jdk-16\bin\java.exe $x
+    Remove-Item $x".class";
+}
+
+Set-Alias search Search-History
+function Search-History { # Write docs
+    param (
+        [Parameter()]
+        [string]
+        $search_text
+    )
+    Get-Content (Get-PSReadlineOption).HistorySavePath | Where-Object { $_ -like "*${search_text}*" }    
+}
+
+Set-Alias poweroff Set-PowerOff
+function Set-PowerOff { # TODO
+    param()
+    python C:\Users\Timmy\Documents\snippets\windows\go_to_bed.py
+}
+
+Set-Alias pum  Update-PythonModules
+function Update-PythonModules { # TODO
+    param()
+    & .\.\update_python_modules.ps1
+}
+
+# Set-Alias ds4 C:\Users\Timmy\Documents\DS4Windows\DS4Windows.exe
