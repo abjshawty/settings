@@ -3,6 +3,14 @@
 $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
 
 # Functions
+Set-Alias glab Connect-Glab
+function Connect-Glab {
+    param ()
+    "LeVPSdeG'Lab-DLSI-2024" | clip.exe
+    Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
+    ssh root@31.187.72.224;
+
+}
 
 Set-Alias unlock Get-OfficeKey
 function Get-OfficeKey {
