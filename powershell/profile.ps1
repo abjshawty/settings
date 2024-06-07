@@ -3,6 +3,18 @@
 $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
 
 # Functions
+function Clone-Git {
+	param (
+	[Parameter(Mandatory)]
+	[string]
+	$user
+	[Parameter(Mandatory)]
+	[string]
+	$project
+	)
+	$command="git clone git@github.com:${user}/${project}.git";
+	Invoke-Expression $command;
+
 Set-Alias glab Connect-Glab
 function Connect-Glab {
     param ()
