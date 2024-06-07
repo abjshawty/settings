@@ -5,16 +5,16 @@ $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).pare
 # Functions
 Set-Alias clone Get-Git
 function Get-Git {
-	param (
-	[Parameter(Mandatory)]
-	[string]
-	$user,
-	[Parameter()]
-	[string]
-	$project
-	)
-	$command="git clone git@github.com:${user}/${project}.git";
-	Invoke-Expression $command;
+    param (
+        [Parameter(Mandatory)]
+        [string]
+        $user,
+        [Parameter()]
+        [string]
+        $project
+    )
+    $command = "git clone git@github.com:${user}/${project}.git";
+    Invoke-Expression $command;
 }
 
 Set-Alias glab-sf Push-Glab
@@ -39,7 +39,8 @@ function Get-OfficeKey {
 }
 
 Set-Alias connect Connect-Wifi
-function Connect-Wifi { # Write docs
+function Connect-Wifi {
+    # Write docs
     param (
         [Parameter(Mandatory)]
         [string]
@@ -55,25 +56,28 @@ function Connect-Wifi { # Write docs
 }
 
 Set-Alias disconnect Disconnect-Wifi
-function Disconnect-Wifi { # Write docs
+function Disconnect-Wifi {
+    # Write docs
     param ()
     netsh.exe wlan disconnect
 }
 
 Set-Alias swap Edit-Policy
-function Edit-Policy { # Write docs
+function Edit-Policy {
+    # Write docs
     param (
-            [Parameter()]
-            [string]
-            $u=$null
+        [Parameter()]
+        [string]
+        $u = $null
     )
-    $a=Get-ExecutionPolicy
-    if($null -eq $u){
+    $a = Get-ExecutionPolicy
+    if ($null -eq $u) {
         try {
             if ($a -eq "Restricted") {
                 Set-ExecutionPolicy Unrestricted
                 Write-Output 'Execution Policy Set To Unrestricted'
-            }else {
+            }
+            else {
                 Set-ExecutionPolicy Restricted
                 Write-Output 'Execution Policy Set To Restricted'
                 Write-Output "u=$u"
@@ -82,12 +86,14 @@ function Edit-Policy { # Write docs
         catch {
             Write-Output 'Please run terminal as admin or use option /x'
         }
-    }else {
+    }
+    else {
         try {
             if ($a -eq "Restricted") {
                 Set-ExecutionPolicy Unrestricted -Scope CurrentUser
                 Write-Output 'Execution Policy Set To Unrestricted'
-            }else {
+            }
+            else {
                 Set-ExecutionPolicy Restricted -Scope CurrentUser
                 Write-Output 'Execution Policy Set To Restricted'
             }
@@ -109,22 +115,25 @@ function Find-WifiKey {
 }
 
 Set-Alias ip Get-Ip
-function Get-Ip { # Write docs
+function Get-Ip {
+    # Write docs
     param()
     $out = (ipconfig.exe | findstr.exe 'IPv4')
     Write-Output ($out | findstr.exe '\.1\.')
 }
 
 Set-Alias push Push-Git
-function Push-Git { # Write docs
+function Push-Git {
+    # Write docs
     param(
         [Parameter(ValueFromRemainingArguments = $true)]
         [string[]]
         $message
     )
-    if($null -eq $message){
+    if ($null -eq $message) {
         Write-Output "Message is missing! Please add a message!"
-    } else {
+    }
+    else {
         git add *
         git commit -m "$message"
         git push
@@ -145,17 +154,20 @@ function Set-MongoDBReplicaSet {
 }
 
 Set-Alias touch New-File
-function New-File { # Write docs
+function New-File {
+    # Write docs
     param(
         [Parameter()]
         [string]
         $name
     )
-    if($null -eq $name){
+    if ($null -eq $name) {
         Write-Output "No name provided"
-    } elseif (Test-Path $name) {
+    }
+    elseif (Test-Path $name) {
         Write-Output "File already exists"
-    } else {
+    }
+    else {
         New-Item -Name $name
     }   
 }
@@ -198,7 +210,7 @@ function New-NodeApp {
         $Framework,
         [Parameter()]
         [string]
-        $Name=""
+        $Name = ""
     )
 
     # Default options available
@@ -231,11 +243,12 @@ function New-NodeApp {
 }
 
 Set-Alias run Invoke-JavaProgram
-function Invoke-JavaProgram { # TODO
+function Invoke-JavaProgram {
+    # TODO
     param (
         [Parameter()]
-            [string]
-            $x
+        [string]
+        $x
     )
     C:\Users\Timmy\Documents\jdk-16\bin\javac.exe $x".java"
     C:\Users\Timmy\Documents\jdk-16\bin\java.exe $x
@@ -243,7 +256,8 @@ function Invoke-JavaProgram { # TODO
 }
 
 Set-Alias search Search-History
-function Search-History { # Write docs
+function Search-History {
+    # Write docs
     param (
         [Parameter()]
         [string]
@@ -253,13 +267,15 @@ function Search-History { # Write docs
 }
 
 Set-Alias poweroff Set-PowerOff
-function Set-PowerOff { # TODO
+function Set-PowerOff {
+    # TODO
     param()
     python C:\Users\Timmy\Documents\snippets\windows\go_to_bed.py
 }
 
 Set-Alias pum  Update-PythonModules
-function Update-PythonModules { # TODO
+function Update-PythonModules {
+    # TODO
     param()
     & $PSScriptRoot/update_python_modules.ps1
 }
