@@ -3,6 +3,13 @@
 $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
 
 # Functions
+Set-Alias glab-sf Push-Glab
+function Push-Glab {
+    param ()
+    "LeVPSdeG'Lab-DLSI-2024" | clip.exe
+    Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
+    sftp root@31.187.72.224;
+}
 Set-Alias glab Connect-Glab
 function Connect-Glab {
     param ()
@@ -240,7 +247,7 @@ function Set-PowerOff { # TODO
 Set-Alias pum  Update-PythonModules
 function Update-PythonModules { # TODO
     param()
-    & .\.\update_python_modules.ps1
+    & $PSScriptRoot/update_python_modules.ps1
 }
 
 # Set-Alias ds4 C:\Users\Timmy\Documents\DS4Windows\DS4Windows.exe
