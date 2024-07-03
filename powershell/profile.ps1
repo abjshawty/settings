@@ -3,6 +3,14 @@
 $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
 
 # Functions
+Set-Alias dlsi Connect-Dlsi
+function Connect-Dlsi {
+    param()
+    "P@ssw0rd2024" | clip.exe;
+    Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
+    "ssh dlsi@dlsi-dev.francecentral.cloudapp.azure.com" | Invoke-Expression;
+}
+
 Set-Alias clone Get-Git
 function Get-Git {
     param (
