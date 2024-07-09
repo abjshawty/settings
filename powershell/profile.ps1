@@ -11,6 +11,18 @@ function Connect-Dlsi {
     "ssh dlsi@dlsi-dev.francecentral.cloudapp.azure.com" | Invoke-Expression;
 }
 
+Set-Alias vps Connect-VPS
+function Connect-VPS {
+    param()
+    # "P@ssw0rd2024" | clip.exe;
+    # Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
+    # "ssh dlsi@dlsi-dev.francecentral.cloudapp.azure.com" | Invoke-Expression;
+    "ssh -i C:\Users\timmy\UbuntuVPS.pem ubuntu@ec2-13-60-28-223.eu-north-1.compute.amazonaws.com" | Invoke-Expression;
+    C:\Users\timmy\UbuntuVPS.pem
+}
+
+C:\Users\timmy\UbuntuVPS.pem
+
 Set-Alias clone Get-Git
 function Get-Git {
     param (
@@ -35,7 +47,8 @@ function Push-Glab {
 Set-Alias glab Connect-Glab
 function Connect-Glab {
     param ()
-    "LeVPSdeG'Lab-DLSI-2024" | clip.exe
+    # "LeVPSdeG'Lab-DLSI-2024" | clip.exe
+    "c'EstN0treVPSG'Lab-DLSI-0507" | clip.exe
     Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
     ssh root@31.187.72.224;
 
