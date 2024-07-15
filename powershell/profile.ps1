@@ -14,11 +14,7 @@ function Connect-Dlsi {
 Set-Alias vps Connect-VPS
 function Connect-VPS {
     param()
-    # "P@ssw0rd2024" | clip.exe;
-    # Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
-    # "ssh dlsi@dlsi-dev.francecentral.cloudapp.azure.com" | Invoke-Expression;
     "ssh -i C:\Users\timmy\UbuntuVPS.pem ubuntu@ec2-13-60-28-223.eu-north-1.compute.amazonaws.com" | Invoke-Expression;
-    C:\Users\timmy\UbuntuVPS.pem
 }
 
 C:\Users\timmy\UbuntuVPS.pem
