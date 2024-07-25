@@ -3,6 +3,12 @@
 $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
 
 # Functions
+Set-Alias storage
+function Get-Storage {
+    param ()
+    Get-PSDrive C
+}
+
 Set-Alias dlsi Connect-Dlsi
 function Connect-Dlsi {
     param()
