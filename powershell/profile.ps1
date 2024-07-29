@@ -3,7 +3,7 @@
 $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
 
 # Functions
-Set-Alias storage
+Set-Alias storage Get-Storage
 function Get-Storage {
     param ()
     Get-PSDrive C
