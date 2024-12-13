@@ -5,6 +5,14 @@ $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).pare
 # Functions
 Set-Alias storage Get-Storage
 function Get-Storage {
+    <#
+    .SYNOPSIS
+        Returns info on free and used storage space in the C:\ drive
+    .DESCRIPTION
+        ditto SYNOPSIS
+    .LINK
+        Be sure to check out more of my code experiments on https://github.com/17lxve
+    #>
     param ()
     Get-PSDrive C
 }
@@ -22,8 +30,6 @@ function Connect-VPS {
     param()
     "ssh -i C:\Users\timmy\UbuntuVPS.pem ubuntu@ec2-13-60-28-223.eu-north-1.compute.amazonaws.com" | Invoke-Expression;
 }
-
-C:\Users\timmy\UbuntuVPS.pem
 
 Set-Alias clone Get-Git
 function Get-Git {
@@ -58,6 +64,15 @@ function Connect-Glab {
 
 Set-Alias unlock Get-OfficeKey
 function Get-OfficeKey {
+<#
+.SYNOPSIS
+    Activates Office/Windows
+.DESCRIPTION
+    Uses the MassGrave algorithm to force unlock Windows 10/11, or Microsoft Office.
+    User will receive prompts through a GUI to decide on which elements he wishes to activate.
+.LINK
+    Be sure to check out more of my code experiments on https://github.com/17lxve
+#>
     Invoke-RestMethod https://massgrave.dev/get | Invoke-Expression;
 }
 
