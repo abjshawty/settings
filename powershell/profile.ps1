@@ -2,7 +2,27 @@
 
 $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
 
+Remove-Item alias:rmdir
 # Functions
+Set-Alias rmdir Remove-Folder
+function Remove-Folder {
+    param(
+        [Parameter(Mandatory)]
+        [string]
+        $item
+    )
+
+    Remove-Item -Recurse -Force $item;
+}
+
+Set-Alias gscie Connect-GesicaCie
+function Connect-GesicaCie {
+    param()
+    "aGreg@22" | clip.exe;
+    Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
+    "ssh gs2e@10.10.102.184" | Invoke-Expression;
+}
+
 Set-Alias storage Get-Storage
 function Get-Storage {
     <#
@@ -52,6 +72,7 @@ function Push-Glab {
     Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
     sftp root@31.187.72.224;
 }
+
 Set-Alias glab Connect-Glab
 function Connect-Glab {
     param ()
@@ -73,7 +94,8 @@ function Get-OfficeKey {
 .LINK
     Be sure to check out more of my code experiments on https://github.com/17lxve
 #>
-    Invoke-RestMethod https://massgrave.dev/get | Invoke-Expression;
+    # Invoke-RestMethod https://massgrave.dev/get | Invoke-Expression;
+Invoke-RestMethod https://get.activated.win | Invoke-Expression;
 }
 
 Set-Alias connect Connect-Wifi
@@ -140,6 +162,26 @@ function Edit-Policy {
             Write-Output 'Please run terminal as admin or use option -u'
         }
     }
+}
+
+Set-Alias cursor Run-Cursor
+function Run-Cursor {
+    param(
+        [Parameter()]
+        [string]
+        $file
+    )
+    C:\Users\othniel.kouadio\AppData\Local\Programs\cursor\Cursor.exe $file
+}
+
+Set-Alias pid Find-FromPort
+function Find-FromPort {
+    param(
+        [Parameter()]
+        [string]
+        $port
+    )
+    Invoke-Expression "netstat -ano | findstr :$($port)"
 }
 
 Set-Alias key Find-WifiKey
