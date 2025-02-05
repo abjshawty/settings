@@ -15,6 +15,14 @@ function Remove-Folder {
     Remove-Item -Recurse -Force $item;
 }
 
+Set-Alias agpay Connect-AGPAYV2
+function Connect-AGPAYV2 {
+    param()
+    "aGreg@22" | clip.exe;
+    Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
+    "ssh gs2e@10.10.140.108" | Invoke-Expression;
+}
+
 Set-Alias gscie Connect-GesicaCie
 function Connect-GesicaCie {
     param()
