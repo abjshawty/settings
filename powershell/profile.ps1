@@ -3,7 +3,18 @@
 $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
 
 Remove-Item alias:rmdir
+Set-Alias e explorer.exe
 # Functions
+Set-Alias port Find-port
+function Find-Port {
+    param(
+        [Parameter(Mandatory)]
+        [string]
+        $processId
+    )
+    (Get-NetTcpConnection -OwningProcess $processId | select LocalPort).LocalPort
+}
+
 Set-Alias rmdir Remove-Folder
 function Remove-Folder {
     param(
@@ -56,7 +67,7 @@ function Connect-Dlsi {
 Set-Alias vps Connect-VPS
 function Connect-VPS {
     param()
-    "ssh -i C:\Users\timmy\UbuntuVPS.pem ubuntu@ec2-13-60-28-223.eu-north-1.compute.amazonaws.com" | Invoke-Expression;
+    "ssh ec2-16-171-151-119.eu-north-1.compute.amazonaws.com" | Invoke-Expression;
 }
 
 Set-Alias clone Get-Git
@@ -102,8 +113,8 @@ function Get-OfficeKey {
 .LINK
     Be sure to check out more of my code experiments on https://github.com/17lxve
 #>
-    # Invoke-RestMethod https://massgrave.dev/get | Invoke-Expression;
-Invoke-RestMethod https://get.activated.win | Invoke-Expression;
+    Invoke-RestMethod https://massgrave.dev/get | Invoke-Expression;
+# Invoke-RestMethod https://get.activated.win | Invoke-Expression;
 }
 
 Set-Alias connect Connect-Wifi
@@ -361,11 +372,26 @@ function Set-PowerOff {
     python C:\Users\Timmy\Documents\snippets\windows\go_to_bed.py
 }
 
-Set-Alias pum  Update-PythonModules
+Set-Alias pum Update-PythonModules
 function Update-PythonModules {
     # TODO
     param()
     & $PSScriptRoot/update_python_modules.ps1
 }
 
+Set-Alias ssh-copy-id Copy-Id
+function Copy-Id {
+    param(
+        [Parameter(Mandatory)]
+        [string]
+        $Target,
+        [Parameter(Mandatory)]
+        [string]
+        $IdentityFile,
+        [switch]$Save = $False
+    )
+    & $PSScriptRoot/ssh-copy-id.ps1 -Target $Target -IdentityFile $IdentityFile -Save:$Save
+}
+
 # Set-Alias ds4 C:\Users\Timmy\Documents\DS4Windows\DS4Windows.exe
+Set-Alias surf windsurf
