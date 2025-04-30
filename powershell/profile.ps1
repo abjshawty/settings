@@ -15,6 +15,17 @@ function Find-Port {
     (Get-NetTcpConnection -OwningProcess $processId | select LocalPort).LocalPort
 }
 
+Set-Alias clone Get-GitSSH
+function Get-GitSSH {
+    param (
+        [Parameter(Mandatory)]
+        [string]
+        $project
+    )
+    $command = "git clone git@github.com:abjshawty/${project}.git";
+    Invoke-Expression $command;
+}
+
 Set-Alias rmdir Remove-Folder
 function Remove-Folder {
     param(
@@ -68,20 +79,6 @@ Set-Alias vps Connect-VPS
 function Connect-VPS {
     param()
     "ssh ec2-16-171-151-119.eu-north-1.compute.amazonaws.com" | Invoke-Expression;
-}
-
-Set-Alias clone Get-Git
-function Get-Git {
-    param (
-        [Parameter(Mandatory)]
-        [string]
-        $user,
-        [Parameter()]
-        [string]
-        $project
-    )
-    $command = "git clone git@github.com:${user}/${project}.git";
-    Invoke-Expression $command;
 }
 
 Set-Alias glab-sf Push-Glab
