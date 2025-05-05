@@ -37,22 +37,6 @@ function Remove-Folder {
     Remove-Item -Recurse -Force $item;
 }
 
-Set-Alias agpay Connect-AGPAYV2
-function Connect-AGPAYV2 {
-    param()
-    "aGreg@22" | clip.exe;
-    Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
-    "ssh gs2e@10.10.140.108" | Invoke-Expression;
-}
-
-Set-Alias gscie Connect-GesicaCie
-function Connect-GesicaCie {
-    param()
-    "aGreg@22" | clip.exe;
-    Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
-    "ssh gs2e@10.10.102.184" | Invoke-Expression;
-}
-
 Set-Alias storage Get-Storage
 function Get-Storage {
     <#
@@ -65,38 +49,6 @@ function Get-Storage {
     #>
     param ()
     Get-PSDrive C
-}
-
-Set-Alias dlsi Connect-Dlsi
-function Connect-Dlsi {
-    param()
-    "P@ssw0rd2024" | clip.exe;
-    Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
-    "ssh dlsi@dlsi-dev.francecentral.cloudapp.azure.com" | Invoke-Expression;
-}
-
-Set-Alias vps Connect-VPS
-function Connect-VPS {
-    param()
-    "ssh ec2-16-171-151-119.eu-north-1.compute.amazonaws.com" | Invoke-Expression;
-}
-
-Set-Alias glab-sf Push-Glab
-function Push-Glab {
-    param ()
-    "LeVPSdeG'Lab-DLSI-2024" | clip.exe
-    Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
-    sftp root@31.187.72.224;
-}
-
-Set-Alias glab Connect-Glab
-function Connect-Glab {
-    param ()
-    # "LeVPSdeG'Lab-DLSI-2024" | clip.exe
-    "c'EstN0treVPSG'Lab-DLSI-0507" | clip.exe
-    Write-Output "Once dialog appears, right-click or press Ctrl + V to paste password in"
-    ssh root@31.187.72.224;
-
 }
 
 Set-Alias unlock Get-OfficeKey
@@ -178,16 +130,6 @@ function Edit-Policy {
             Write-Output 'Please run terminal as admin or use option -u'
         }
     }
-}
-
-Set-Alias cursor Run-Cursor
-function Run-Cursor {
-    param(
-        [Parameter()]
-        [string]
-        $file
-    )
-    C:\Users\othniel.kouadio\AppData\Local\Programs\cursor\Cursor.exe $file
 }
 
 Set-Alias pid Find-FromPort
