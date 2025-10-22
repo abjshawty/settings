@@ -253,6 +253,7 @@ function New-NodeApp {
 
     # Default options available
     $frameworks = @{
+        "expo"          = "npx create-expo@latest ${Name}";
         "react"         = "npx create-vite@latest ${Name} -- --template react-ts";
         "svelte"        = "npx create-vite@latest ${Name} -- --template svelte-ts";
         "solid"         = "npx create-vite@latest ${Name} -- --template solid-ts";
