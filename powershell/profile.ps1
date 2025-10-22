@@ -248,11 +248,14 @@ function New-NodeApp {
         $Framework,
         [Parameter()]
         [string]
-        $Name = ""
+        $Name = "",
+        [Parameter()]
+        [string]
+        $PackageManager = "yarn"
     )
 
     # Default options available
-    $frameworks = @{
+    $frameworks_npm = @{
         "expo"          = "npx create-expo@latest ${Name}";
         "react"         = "npx create-vite@latest ${Name} -- --template react-ts";
         "svelte"        = "npx create-vite@latest ${Name} -- --template svelte-ts";
@@ -263,15 +266,31 @@ function New-NodeApp {
         "next"          = "npx create-next-app@latest ${Name} --use-npm";
         "vue"           = "npm init vue@latest ${Name}";
         "vite-express"  = "npx create-vite-express@latest ${Name}";
-        "express"       = "git clone https://github.com/17lxve/server-js ${Name}";
-        "express-ts"    = "git clone https://github.com/17lxve/server-ts ${Name}";
+        "server"        = "gh repo create ${Name} --template abjshawty/server --private --clone";
         "test"          = "Write-Output 'I survived 2023 just to die at GREYDAY'"
+        "help"          = "Get-Help New-NodeApp"
+    }
+    $frameworks_yarn = @{
+        "expo"          = "yarn dlx create-expo@latest ${Name}";
+        "react"         = "yarn dlx create-vite@latest ${Name} -- --template react-ts";
+        "svelte"        = "yarn dlx create-vite@latest ${Name} -- --template svelte-ts";
+        "solid"         = "yarn dlx create-vite@latest ${Name} -- --template solid-ts";
+        "qwik"          = "yarn dlx create-vite@latest ${Name} -- --template qwik-ts";
+        "lit"           = "yarn dlx create-vite@latest ${Name} -- --template lit-ts";
+        "react-no-vite" = "yarn dlx create-react-app@latest ${Name} --use-npm";
+        "next"          = "yarn dlx create-next-app@latest ${Name} --use-npm";
+        "vue"           = "yarn init vue@latest ${Name}";
+        "vite-express"  = "yarn dlx create-vite-express@latest ${Name}";
+        "server"        = "gh repo create ${Name} --template abjshawty/server --private --clone";
+        "test"          = "Write-Output 'I survived 2025 just to die at GREYDAY'"
         "help"          = "Get-Help New-NodeApp"
     }
     Write-Output "Starting...`n"
     # Run
     try {
-        Invoke-Expression $frameworks[$Framework]
+        $variableName = "frameworks_$PackageManager"
+        Write-Output $variableName
+        Invoke-Expression ((Get-Variable $variableName).Value[$Framework])
     }
     catch {
         Write-Error "Bro, there was an error here: $($_.Exception.Message)"
