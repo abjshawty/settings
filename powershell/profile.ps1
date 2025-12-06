@@ -12,7 +12,7 @@ function Find-Port {
         [string]
         $processId
     )
-    (Get-NetTcpConnection -OwningProcess $processId | select LocalPort).LocalPort
+    (Get-NetTcpConnection -OwningProcess $processId | Select-Object LocalPort).LocalPort
 }
 
 Set-Alias clone Get-GitSSH
@@ -53,7 +53,7 @@ function Get-Storage {
 
 Set-Alias unlock Get-OfficeKey
 function Get-OfficeKey {
-<#
+    <#
 .SYNOPSIS
     Activates Office/Windows
 .DESCRIPTION
@@ -63,7 +63,7 @@ function Get-OfficeKey {
     Be sure to check out more of my code experiments on https://github.com/17lxve
 #>
     Invoke-RestMethod https://massgrave.dev/get | Invoke-Expression;
-# Invoke-RestMethod https://get.activated.win | Invoke-Expression;
+    # Invoke-RestMethod https://get.activated.win | Invoke-Expression;
 }
 
 Set-Alias connect Connect-Wifi
@@ -298,6 +298,11 @@ function New-NodeApp {
     finally {
         Write-Output "`nWe are finished here.`nGood luck, Voyager."
     }
+}
+
+Set-Alias update Update-NodeApp
+function Update-NodeApp {
+    Invoke-Expression "npx npm-check-updates -u"
 }
 
 Set-Alias run Invoke-JavaProgram
