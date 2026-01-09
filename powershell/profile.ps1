@@ -2,7 +2,15 @@
 
 $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
 
+oh-my-posh init pwsh --config "material"| Invoke-Expression
+
+# Cleanup
 Remove-Item alias:rmdir
+Remove-Item alias:ls
+
+function ls { eza --icons $args }
+function lt { eza --icons --tree --level=2 $args }
+
 Set-Alias e explorer.exe
 # Functions
 Set-Alias port Find-port
