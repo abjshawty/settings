@@ -12,6 +12,7 @@ function ls { eza --icons $args }
 function lt { eza --icons --tree --level=2 $args }
 
 Set-Alias e explorer.exe
+Set-Alias v nvim.exe
 # Functions
 Set-Alias port Find-port
 function Find-Port {
