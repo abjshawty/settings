@@ -1,7 +1,31 @@
-- Android Studio : androidstudio
-- Launch4J : launch4j
-- Docker : docker-engine, docker-cli, docker-desktop
-- SharpKeys
-- SceneBuilder
-- TMAC
-- StreamLabs : streamlabs-obs
+BrechtSanders.WinLibs.POSIX.UCRT
+BurntSushi.ripgrep.MSVC
+Cockos.REAPER
+Codeium.Windsurf
+CoreyButler.NVMforWindows
+DBeaver.DBeaver.Community
+Discord.Discord
+EpicGames.EpicGamesLauncher
+eza-community.eza
+Git.Git
+GitHub.cli
+Golang.Go
+HTTPie.HTTPie
+ImputNet.Helium
+JaneDeDobbeleer.OhMyPosh
+Microsoft.Teams
+MongoDB.Compass.Full
+Mozilla.Thunderbird
+Nefarius.HidHide
+Neovim.Neovim
+Notion.Notion
+Oracle.JDK.21
+Python.Python.3.13
+Ryochan7.DS4Windows
+Rustlang.Rustup
+Spotify.Spotify
+Valve.Steam
+ViGEm.ViGEmBus
+wez.wezterm
+Zen-Team.Zen-Browser
+zig.zig
