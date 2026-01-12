@@ -15,7 +15,7 @@ Set-Alias e explorer.exe
 Set-Alias v nvim.exe
 Set-Alias c windsurf
 Set-Alias w winget
-
+# cmd.exe /c mklink /H .wezterm.lua C:\Users\kouad\dev  
 # Functions
 Set-Alias port Find-port
 function Find-Port {
