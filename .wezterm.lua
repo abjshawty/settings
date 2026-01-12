@@ -7,7 +7,7 @@ config.window_decorations = "RESIZE"
 config.color_scheme = 'Tokyo Night'
 config.window_background_opacity = 0.75
 config.default_prog = { 'powershell.exe', '-NoLogo' }
-
+config.front_end = 'WebGpu'
 config.keys = {
 	{
 		key = 'h',
