@@ -2,7 +2,7 @@
 
 $dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
 
-oh-my-posh init pwsh --config "material"| Invoke-Expression
+oh-my-posh init pwsh --config "material" | Invoke-Expression
 
 # Cleanup
 Remove-Item alias:rmdir
@@ -13,6 +13,9 @@ function lt { eza --icons --tree --level=2 $args }
 
 Set-Alias e explorer.exe
 Set-Alias v nvim.exe
+Set-Alias c windsurf
+Set-Alias w winget
+
 # Functions
 Set-Alias port Find-port
 function Find-Port {
@@ -368,3 +371,4 @@ function Copy-Id {
 
 # Set-Alias ds4 C:\Users\Timmy\Documents\DS4Windows\DS4Windows.exe
 Set-Alias surf windsurf
+Set-Alias vim nvim.exe
