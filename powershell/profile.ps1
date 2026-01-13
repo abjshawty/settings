@@ -10,6 +10,7 @@ $workspace = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)
 
 # try { oh-my-posh init pwsh --config "material" | Invoke-Expression } catch { }
 oh-my-posh init pwsh --config "material" | Invoke-Expression 2>$null
+zoxide.exe init powershell | Out-String | Invoke-Expression 2>$null
 
 # ============================================================================
 # CLEANUP
@@ -17,6 +18,7 @@ oh-my-posh init pwsh --config "material" | Invoke-Expression 2>$null
 
 if (Test-Path alias:rmdir) { Remove-Item alias:rmdir }
 if (Test-Path alias:ls) { Remove-Item alias:ls }
+if (Test-Path alias:cd) { Remove-Item alias:cd }
 
 # ============================================================================
 # FUNCTIONS (Alphabetical Order)
@@ -1143,7 +1145,6 @@ function Remove-Folder {
         Remove-Folder "temp" -DryRun
         Shows what would be deleted in temp folder
     #>
-    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline = $true)]
         [ValidateNotNullOrEmpty()]
@@ -1403,7 +1404,7 @@ function Set-LocationDev {
         
         # Change location
         Set-Location $resolvedPath -ErrorAction Stop
-        Write-Output "Changed to directory: $resolvedPath"
+        Write-Verbose "Changed to directory: $resolvedPath"
         
         # Show current location for confirmation
         Write-Verbose "Current location: $(Get-Location)"
@@ -1413,7 +1414,7 @@ function Set-LocationDev {
         Write-Verbose "Directory contains $itemCount items"
         
         # Return directory info
-        return Get-Item $resolvedPath
+        # return Get-Item $resolvedPath
     }
     catch [System.UnauthorizedAccessException] {
         Write-Error "Access denied: Cannot access directory '$targetPath'"
@@ -1673,6 +1674,7 @@ function Test-ProfileFunctions {
 # ============================================================================
 
 Set-Alias b Get-DefaultBrowserPath
+Set-Alias cd z
 Set-Alias clone Get-GitSSH
 Set-Alias connect Connect-Wifi
 Set-Alias c windsurf

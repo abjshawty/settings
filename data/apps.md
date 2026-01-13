@@ -1,3 +1,4 @@
+ajeetdsouza.zoxide
 BrechtSanders.WinLibs.POSIX.UCRT
 BurntSushi.ripgrep.MSVC
 Cockos.REAPER
@@ -13,6 +14,7 @@ Golang.Go
 HTTPie.HTTPie
 ImputNet.Helium
 JaneDeDobbeleer.OhMyPosh
+junegunn.fzf
 Microsoft.Teams
 MongoDB.Compass.Full
 Mozilla.Thunderbird
