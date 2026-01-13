@@ -15,8 +15,32 @@ Set-Alias e explorer.exe
 Set-Alias v nvim.exe
 Set-Alias c windsurf
 Set-Alias w winget
+Set-Alias b "C:\\Program Files\\Zen Browser\\zen.exe"
+Set-Alias o Open-Origin
+Set-Alias keygen ssh-keygen
 # cmd.exe /c mklink /H .wezterm.lua C:\Users\kouad\dev  
 # Functions
+function Find-HTTPSUrl {
+    param (
+        [Parameter(Mandatory)]
+        [string]
+        $url
+    )
+    $url = $url -replace ':', '/'
+    $url = $url -replace 'git@', 'https://'
+    $url
+}
+
+Set-Alias ssh_url Find-HTTPSUrl
+
+function Open-Origin {
+    $url = git remote get-url origin
+    $https = Find-HTTPSUrl -url $url
+    b $https
+}
+
+Set-Alias origin Open-Origin
+
 Set-Alias port Find-port
 function Find-Port {
     param(
