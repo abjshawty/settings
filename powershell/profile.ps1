@@ -6,18 +6,13 @@ try { oh-my-posh init pwsh --config "material" | Invoke-Expression } catch { };
 if (Test-Path alias:rmdir) { Remove-Item alias:rmdir };
 if (Test-Path alias:ls) { Remove-Item alias:ls };
 
-function ls { eza --icons $args }
-function lt { eza --icons --tree --level=2 $args }
 
-Set-Alias e explorer.exe
-Set-Alias v nvim.exe
-Set-Alias c windsurf
-Set-Alias w winget
-Set-Alias b (Get-DefaultBrowserPath)
-Set-Alias o Open-Origin
-Set-Alias keygen ssh-keygen
+
 # cmd.exe /c mklink /H .wezterm.lua C:\Users\kouad\dev  
 # Functions
+function sym { cmd.exe /c mklink /H $args }
+function ls { eza --icons $args }
+function lt { eza --icons --tree --level=2 $args }
 
 function Get-DefaultBrowserName {
     $browserRegPath = 'HKCU:\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice'
@@ -59,7 +54,6 @@ function Find-HTTPSUrl {
     $url
 }
 
-Set-Alias ssh_url Find-HTTPSUrl
 
 function Open-Origin {
     $url = git remote get-url origin
@@ -67,9 +61,7 @@ function Open-Origin {
     b $https
 }
 
-Set-Alias origin Open-Origin
 
-Set-Alias port Find-port
 function Find-Port {
     param(
         [Parameter(Mandatory)]
@@ -79,7 +71,7 @@ function Find-Port {
     (Get-NetTcpConnection -OwningProcess $processId | Select-Object LocalPort).LocalPort
 }
 
-Set-Alias clone Get-GitSSH
+
 function Get-GitSSH {
     param (
         [Parameter(Mandatory)]
@@ -90,7 +82,6 @@ function Get-GitSSH {
     Invoke-Expression $command;
 }
 
-Set-Alias rmdir Remove-Folder
 function Remove-Folder {
     param(
         [Parameter(Mandatory)]
@@ -101,7 +92,6 @@ function Remove-Folder {
     Remove-Item -Recurse -Force $item;
 }
 
-Set-Alias storage Get-Storage
 function Get-Storage {
     <#
     .SYNOPSIS
@@ -115,7 +105,6 @@ function Get-Storage {
     Get-PSDrive C
 }
 
-Set-Alias unlock Get-OfficeKey
 function Get-OfficeKey {
     <#
 .SYNOPSIS
@@ -130,7 +119,6 @@ function Get-OfficeKey {
     # Invoke-RestMethod https://get.activated.win | Invoke-Expression;
 }
 
-Set-Alias connect Connect-Wifi
 function Connect-Wifi {
     # Write docs
     param (
@@ -147,14 +135,12 @@ function Connect-Wifi {
     }
 }
 
-Set-Alias disconnect Disconnect-Wifi
 function Disconnect-Wifi {
     # Write docs
     param ()
     netsh.exe wlan disconnect
 }
 
-Set-Alias swap Edit-Policy
 function Edit-Policy {
     # Write docs
     param (
@@ -196,7 +182,6 @@ function Edit-Policy {
     }
 }
 
-Set-Alias pid Find-FromPort
 function Find-FromPort {
     param(
         [Parameter()]
@@ -206,7 +191,6 @@ function Find-FromPort {
     Invoke-Expression "netstat -ano | findstr :$($port)"
 }
 
-Set-Alias key Find-WifiKey
 function Find-WifiKey {
     param (
         [Parameter()]
@@ -216,7 +200,6 @@ function Find-WifiKey {
     Invoke-Expression "netsh wlan show profile $($name) key=clear | findstr Key"
 }
 
-Set-Alias ip Get-Ip
 function Get-Ip {
     # Write docs
     param()
@@ -224,7 +207,6 @@ function Get-Ip {
     Write-Output ($out | findstr.exe '\.1\.')
 }
 
-Set-Alias push Push-Git
 function Push-Git {
     # Write docs
     param(
@@ -242,20 +224,15 @@ function Push-Git {
     }
 }
 
-Set-Alias dev Set-LocationDev
 function Set-LocationDev {
     Set-Location $dev;
-    # Write-Output $dev
-
 }
 
-Set-Alias mongors Set-MongoDBReplicaSet
 function Set-MongoDBReplicaSet {
     # mongosh.exe --eval db.
     mongod --replSet rs0 --port 27017 --dbpath "C:\Program Files\MongoDB\Server\6.0\data"
 }
 
-Set-Alias touch New-File
 function New-File {
     # Write docs
     param(
@@ -274,7 +251,6 @@ function New-File {
     }   
 }
 
-Set-Alias init New-NodeApp
 function New-NodeApp {
     <#
     .SYNOPSIS
@@ -364,12 +340,10 @@ function New-NodeApp {
     }
 }
 
-Set-Alias update Update-NodeApp
 function Update-NodeApp {
     Invoke-Expression "npx npm-check-updates -u"
 }
 
-Set-Alias run Invoke-JavaProgram
 function Invoke-JavaProgram {
     # TODO
     param (
@@ -382,7 +356,6 @@ function Invoke-JavaProgram {
     Remove-Item $x".class";
 }
 
-Set-Alias search Search-History
 function Search-History {
     # Write docs
     param (
@@ -393,34 +366,46 @@ function Search-History {
     Get-Content (Get-PSReadlineOption).HistorySavePath | Where-Object { $_ -like "*${search_text}*" }    
 }
 
-Set-Alias poweroff Set-PowerOff
 function Set-PowerOff {
     # TODO
     param()
     python C:\Users\Timmy\Documents\snippets\windows\go_to_bed.py
 }
 
-Set-Alias pum Update-PythonModules
 function Update-PythonModules {
-    # TODO
     param()
     & $PSScriptRoot/update_python_modules.ps1
 }
 
-Set-Alias ssh-copy-id Copy-Id
-function Copy-Id {
-    param(
-        [Parameter(Mandatory)]
-        [string]
-        $Target,
-        [Parameter(Mandatory)]
-        [string]
-        $IdentityFile,
-        [switch]$Save = $False
-    )
-    & $PSScriptRoot/ssh-copy-id.ps1 -Target $Target -IdentityFile $IdentityFile -Save:$Save
-}
-
-# Set-Alias ds4 C:\Users\Timmy\Documents\DS4Windows\DS4Windows.exe
-Set-Alias surf windsurf
+Set-Alias pum Update-PythonModules
+Set-Alias e explorer.exe
+Set-Alias v nvim.exe
+Set-Alias c windsurf
+Set-Alias w winget
+Set-Alias b (Get-DefaultBrowserPath)
+Set-Alias o Open-Origin
+Set-Alias keygen ssh-keygen
 Set-Alias vim nvim.exe
+Set-Alias surf windsurf
+Set-Alias poweroff Set-PowerOff
+Set-Alias ssh_url Find-HTTPSUrl
+Set-Alias origin Open-Origin
+Set-Alias port Find-port
+Set-Alias clone Get-GitSSH
+Set-Alias connect Connect-Wifi
+Set-Alias disconnect Disconnect-Wifi
+Set-Alias unlock Get-OfficeKey
+Set-Alias swap Edit-Policy
+Set-Alias rmdir Remove-Folder
+Set-Alias pid Find-FromPort
+Set-Alias dev Set-LocationDev
+Set-Alias mongors Set-MongoDBReplicaSet
+Set-Alias push Push-Git
+Set-Alias ip Get-Ip
+Set-Alias key Find-WifiKey
+Set-Alias init New-NodeApp
+Set-Alias search Search-History
+Set-Alias touch New-File
+Set-Alias storage Get-Storage
+Set-Alias run Invoke-JavaProgram
+Set-Alias update Update-NodeApp
