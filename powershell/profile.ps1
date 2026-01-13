@@ -8,7 +8,8 @@ $workspace = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)
 # INITIALIZATION
 # ============================================================================
 
-try { oh-my-posh init pwsh --config "material" | Invoke-Expression } catch { }
+# try { oh-my-posh init pwsh --config "material" | Invoke-Expression } catch { }
+oh-my-posh init pwsh --config "material" | Invoke-Expression 2>$null
 
 # ============================================================================
 # CLEANUP
@@ -395,6 +396,7 @@ function Get-DefaultBrowserName {
         "IE.HTTP" { return "Microsoft Edge (or Internet Explorer)" }
         "MSEdgeBHTM" { return "Microsoft Edge" }
         "HeliumHTM.VJJYHVVQDE56KG4TNASJ5NYUZU" { return "Helium" }
+        "FirefoxURL-F0DC299D809B9700" { return "Zen Browser" }
         default { return "Unknown or non-standard browser (ProgId: $browserProgId)" }
     }
 }
@@ -415,7 +417,7 @@ function Get-DefaultBrowserPath {
     $regPath = "Registry::HKEY_CLASSES_ROOT\$browserProgId\shell\open\command"
     $browserObj = Get-ItemProperty $regPath
     # Extract just the executable path from the command string
-    $browserObj.'(default)' -replace '^"([^"]+)".*$', '$1' -replace '^([^\s]+).*$', '$1'
+    $browserObj.'(default)' -replace '^"([^"]+)".*$', '$1'
 }
 
 function Get-GitSSH {
