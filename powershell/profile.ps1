@@ -22,6 +22,18 @@ if (Test-Path alias:ls) { Remove-Item alias:ls }
 # ============================================================================
 
 function Connect-Wifi {
+    <#
+    .SYNOPSIS
+        Connects to a specified WiFi network.
+    .DESCRIPTION
+        Uses netsh.exe to connect to a WiFi network by name.
+        Provides feedback on connection status.
+    .PARAMETER name
+        The name of the WiFi network to connect to.
+    .EXAMPLE
+        Connect-Wifi "MyNetwork"
+        Connects to the WiFi network named "MyNetwork"
+    #>
     param (
         [Parameter(Mandatory)]
         [string]
@@ -37,11 +49,36 @@ function Connect-Wifi {
 }
 
 function Disconnect-Wifi {
+    <#
+    .SYNOPSIS
+        Disconnects from the current WiFi network.
+    .DESCRIPTION
+        Uses netsh.exe to disconnect from the currently connected WiFi network.
+    .EXAMPLE
+        Disconnect-Wifi
+        Disconnects from the current WiFi connection
+    #>
     param ()
     netsh.exe wlan disconnect
 }
 
 function Edit-Policy {
+    <#
+    .SYNOPSIS
+        Toggles PowerShell execution policy between Restricted and Unrestricted.
+    .DESCRIPTION
+        Switches PowerShell execution policy between Restricted and Unrestricted states.
+        Can operate at user scope or system scope (requires admin privileges).
+    .PARAMETER u
+        If specified, changes policy for CurrentUser scope only.
+        If not specified, attempts to change system-wide policy (requires admin).
+    .EXAMPLE
+        Edit-Policy
+        Toggles system-wide execution policy (requires admin)
+    .EXAMPLE
+        Edit-Policy -u "true"
+        Toggles CurrentUser execution policy
+    #>
     param (
         [Parameter()]
         [string]
@@ -82,6 +119,18 @@ function Edit-Policy {
 }
 
 function Find-FromPort {
+    <#
+    .SYNOPSIS
+        Finds processes using a specific port.
+    .DESCRIPTION
+        Uses netstat to find which processes are listening on or using a specific port.
+        Returns the process ID and connection information.
+    .PARAMETER port
+        The port number to search for.
+    .EXAMPLE
+        Find-FromPort "8080"
+        Shows all processes using port 8080
+    #>
     param(
         [Parameter()]
         [string]
@@ -91,6 +140,18 @@ function Find-FromPort {
 }
 
 function Find-HTTPSUrl {
+    <#
+    .SYNOPSIS
+        Converts Git SSH URLs to HTTPS URLs.
+    .DESCRIPTION
+        Transforms Git SSH URLs (git@github.com:user/repo.git) to HTTPS URLs.
+        Useful for opening repositories in browsers or for HTTPS operations.
+    .PARAMETER url
+        The Git URL to convert (SSH or HTTPS format).
+    .EXAMPLE
+        Find-HTTPSUrl -url "git@github.com:user/repo.git"
+        Returns "https://github.com/user/repo.git"
+    #>
     param (
         [Parameter(Mandatory)]
         [string]
@@ -102,6 +163,18 @@ function Find-HTTPSUrl {
 }
 
 function Find-Port {
+    <#
+    .SYNOPSIS
+        Gets the local port used by a specific process.
+    .DESCRIPTION
+        Retrieves the local port number that a process is listening on.
+        Useful for identifying which port your application is using.
+    .PARAMETER processId
+        The ID of the process to find the port for.
+    .EXAMPLE
+        Find-Port -processId "1234"
+        Returns the port number used by process ID 1234
+    #>
     param(
         [Parameter(Mandatory)]
         [string]
@@ -111,6 +184,18 @@ function Find-Port {
 }
 
 function Find-WifiKey {
+    <#
+    .SYNOPSIS
+        Retrieves the WiFi password for a specified network.
+    .DESCRIPTION
+        Uses netsh to show the WiFi profile and extracts the password.
+        Requires administrative privileges to view network keys.
+    .PARAMETER name
+        The name of the WiFi network to get the password for.
+    .EXAMPLE
+        Find-WifiKey "MyNetwork"
+        Shows the password for WiFi network "MyNetwork"
+    #>
     param (
         [Parameter()]
         [string]
@@ -120,6 +205,16 @@ function Find-WifiKey {
 }
 
 function Get-DefaultBrowserName {
+    <#
+    .SYNOPSIS
+        Gets the name of the default system browser.
+    .DESCRIPTION
+        Reads Windows registry to determine which browser is set as default.
+        Returns human-readable browser names like "Google Chrome" or "Mozilla Firefox".
+    .EXAMPLE
+        Get-DefaultBrowserName
+        Returns "Google Chrome" if Chrome is the default browser
+    #>
     $browserRegPath = 'HKCU:\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice'
     $browserProgId = (Get-ItemProperty $browserRegPath).ProgId
 
@@ -134,6 +229,16 @@ function Get-DefaultBrowserName {
 }
 
 function Get-DefaultBrowserPath {
+    <#
+    .SYNOPSIS
+        Gets the executable path of the default system browser.
+    .DESCRIPTION
+        Reads Windows registry to determine the full path to the default browser executable.
+        Useful for launching URLs programmatically.
+    .EXAMPLE
+        Get-DefaultBrowserPath
+        Returns "C:\Program Files\Google\Chrome\Application\chrome.exe" if Chrome is default
+    #>
     $browserRegPath = 'HKCU:\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice'
     $browserProgId = (Get-ItemProperty $browserRegPath).ProgId
     $regPath = "Registry::HKEY_CLASSES_ROOT\$browserProgId\shell\open\command"
@@ -143,6 +248,18 @@ function Get-DefaultBrowserPath {
 }
 
 function Get-GitSSH {
+    <#
+    .SYNOPSIS
+        Clones a repository from GitHub using SSH.
+    .DESCRIPTION
+        Creates a git clone command for the specified repository from the abjshawty GitHub account.
+        Uses SSH protocol for cloning.
+    .PARAMETER project
+        The name of the repository to clone (without .git extension).
+    .EXAMPLE
+        Get-GitSSH "my-repo"
+        Clones git@github.com:abjshawty/my-repo.git
+    #>
     param (
         [Parameter(Mandatory)]
         [string]
@@ -153,6 +270,16 @@ function Get-GitSSH {
 }
 
 function Get-Ip {
+    <#
+    .SYNOPSIS
+        Gets the local IP address.
+    .DESCRIPTION
+        Uses ipconfig to find IPv4 addresses and filters for addresses starting with .1.
+        Typically returns the local network IP address.
+    .EXAMPLE
+        Get-Ip
+        Returns "192.168.1.100" (example local IP)
+    #>
     param()
     $out = (ipconfig.exe | findstr.exe 'IPv4')
     Write-Output ($out | findstr.exe '\.1\.')
@@ -185,6 +312,18 @@ function Get-Storage {
 }
 
 function New-File {
+    <#
+    .SYNOPSIS
+        Creates a new file with the specified name.
+    .DESCRIPTION
+        Creates a new empty file if it doesn't already exist.
+        Provides feedback if no name is provided or if file already exists.
+    .PARAMETER name
+        The name of the file to create.
+    .EXAMPLE
+        New-File "test.txt"
+        Creates a new file named test.txt
+    #>
     param(
         [Parameter()]
         [string]
@@ -291,12 +430,34 @@ function New-NodeApp {
 }
 
 function Open-Origin {
+    <#
+    .SYNOPSIS
+        Opens the Git origin remote URL in the default browser.
+    .DESCRIPTION
+        Gets the origin remote URL from the current Git repository,
+        converts it to HTTPS format if needed, and opens it in the default browser.
+    .EXAMPLE
+        Open-Origin
+        Opens the current repository's GitHub page in the browser
+    #>
     $url = git remote get-url origin
     $https = Find-HTTPSUrl -url $url
     & (Get-DefaultBrowserPath) $https
 }
 
 function Push-Git {
+    <#
+    .SYNOPSIS
+        Adds, commits, and pushes changes to Git repository.
+    .DESCRIPTION
+        Performs a complete Git workflow: add all changes, commit with message,
+        and push to remote repository.
+    .PARAMETER message
+        The commit message to use for the commit.
+    .EXAMPLE
+        Push-Git "Fix bug in authentication"
+        Adds all changes, commits with message, and pushes to remote
+    #>
     param(
         [Parameter(ValueFromRemainingArguments = $true)]
         [string[]]
@@ -313,6 +474,18 @@ function Push-Git {
 }
 
 function Remove-Folder {
+    <#
+    .SYNOPSIS
+        Removes a folder and all its contents.
+    .DESCRIPTION
+        Forcefully removes a directory and all its subdirectories and files.
+        Uses -Recurse and -Force parameters for complete removal.
+    .PARAMETER item
+        The path to the folder to remove.
+    .EXAMPLE
+        Remove-Folder "C:\temp\old-folder"
+        Completely removes the old-folder directory
+    #>
     param(
         [Parameter(Mandatory)]
         [string]
@@ -322,6 +495,18 @@ function Remove-Folder {
 }
 
 function Search-History {
+    <#
+    .SYNOPSIS
+        Searches PowerShell command history for specific text.
+    .DESCRIPTION
+        Searches through the saved PowerShell command history and returns
+        commands that contain the specified search text.
+    .PARAMETER search_text
+        The text to search for in command history.
+    .EXAMPLE
+        Search-History "git"
+        Returns all commands containing "git" from history
+    #>
     param (
         [Parameter()]
         [string]
@@ -331,6 +516,16 @@ function Search-History {
 }
 
 function Set-LocationDev {
+    <#
+    .SYNOPSIS
+        Changes directory to the development folder.
+    .DESCRIPTION
+        Navigates to the development directory defined in the $dev variable.
+    The $dev variable is automatically set to the parent of the script's grandparent directory.
+    .EXAMPLE
+        Set-LocationDev
+        Changes to the development directory
+    #>
     Set-Location $dev;
 }
 
@@ -338,11 +533,51 @@ function sym { cmd.exe /c mklink /H $args }
 function ls { eza --icons $args }
 function lt { eza --icons --tree --level=2 $args }
 
+<#
+.SYNOPSIS
+    Creates symbolic links and enhanced directory listings.
+
+.DESCRIPTION
+    sym: Creates hard symbolic links using cmd.exe mklink.
+    ls: Enhanced directory listing with icons using eza.
+    lt: Enhanced tree view listing with icons (2 levels deep) using eza.
+
+.EXAMPLE
+    sym target.txt link.txt
+    Creates a hard link from link.txt to target.txt
+    
+    ls
+    Shows current directory with icons
+    
+    lt
+    Shows current directory as tree with icons (2 levels)
+#>
+
 function Update-NodeApp {
+    <#
+    .SYNOPSIS
+        Updates Node.js dependencies to latest versions.
+    .DESCRIPTION
+        Uses npm-check-updates to update package.json dependencies
+        to their latest versions while respecting version ranges.
+    .EXAMPLE
+        Update-NodeApp
+        Updates all dependencies in package.json to latest versions
+    #>
     Invoke-Expression "npx npm-check-updates -u"
 }
 
 function Update-PythonModules {
+    <#
+    .SYNOPSIS
+        Updates Python modules using a separate script.
+    .DESCRIPTION
+        Executes the update_python_modules.ps1 script located in the same directory
+        as this profile to update Python packages and modules.
+    .EXAMPLE
+        Update-PythonModules
+        Runs the Python module update script
+    #>
     param()
     & $PSScriptRoot/update_python_modules.ps1
 }
