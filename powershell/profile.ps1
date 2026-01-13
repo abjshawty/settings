@@ -1,126 +1,27 @@
-# Variables
-$dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;;
-try { oh-my-posh init pwsh --config "material" | Invoke-Expression } catch { };
+# ============================================================================
+# VARIABLES
+# ============================================================================
 
-# Cleanup
-if (Test-Path alias:rmdir) { Remove-Item alias:rmdir };
-if (Test-Path alias:ls) { Remove-Item alias:ls };
+$dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName
 
+# ============================================================================
+# INITIALIZATION
+# ============================================================================
 
+try { oh-my-posh init pwsh --config "material" | Invoke-Expression } catch { }
 
-# cmd.exe /c mklink /H .wezterm.lua C:\Users\kouad\dev  
-# Functions
-function sym { cmd.exe /c mklink /H $args }
-function ls { eza --icons $args }
-function lt { eza --icons --tree --level=2 $args }
+# ============================================================================
+# CLEANUP
+# ============================================================================
 
-function Get-DefaultBrowserName {
-    $browserRegPath = 'HKCU:\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice'
-    $browserProgId = (Get-ItemProperty $browserRegPath).ProgId
+if (Test-Path alias:rmdir) { Remove-Item alias:rmdir }
+if (Test-Path alias:ls) { Remove-Item alias:ls }
 
-    switch ($browserProgId) {
-        "ChromeHTML" { return "Google Chrome" }
-        "FirefoxURL" { return "Mozilla Firefox" }
-        "IE.HTTP"    { return "Microsoft Edge (or Internet Explorer)" }
-        "MSEdgeBHTM" { return "Microsoft Edge" }
-        "HeliumHTM.VJJYHVVQDE56KG4TNASJ5NYUZU" { return "Helium"}
-        # Add other cases for different browsers if needed
-        default { return "Unknown or non-standard browser (ProgId: $browserProgId)" }
-    }
-}
-
-function Get-DefaultBrowserPath {
-    $browserRegPath = 'HKCU:\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice'
-    $browserProgId = (Get-ItemProperty $browserRegPath).ProgId
-    $regPath = "Registry::HKEY_CLASSES_ROOT\$browserProgId\shell\open\command"
-    $browserObj = Get-ItemProperty $regPath
-    # Extract just the executable path from the command string
-    $browserObj.'(default)' -replace '^"([^"]+)".*$', '$1' -replace '^([^\s]+).*$', '$1'
-}
-
-# Example usage:
-# Write-Host "The current default browser is:" (Get-DefaultBrowserName);
-# Write-Host "The current default browser path is:" (Get-DefaultBrowserPath);
-
-
-function Find-HTTPSUrl {
-    param (
-        [Parameter(Mandatory)]
-        [string]
-        $url
-    )
-    $url = $url -replace ':', '/'
-    $url = $url -replace 'git@', 'https://'
-    $url
-}
-
-
-function Open-Origin {
-    $url = git remote get-url origin
-    $https = Find-HTTPSUrl -url $url
-    b $https
-}
-
-
-function Find-Port {
-    param(
-        [Parameter(Mandatory)]
-        [string]
-        $processId
-    )
-    (Get-NetTcpConnection -OwningProcess $processId | Select-Object LocalPort).LocalPort
-}
-
-
-function Get-GitSSH {
-    param (
-        [Parameter(Mandatory)]
-        [string]
-        $project
-    )
-    $command = "git clone git@github.com:abjshawty/${project}.git";
-    Invoke-Expression $command;
-}
-
-function Remove-Folder {
-    param(
-        [Parameter(Mandatory)]
-        [string]
-        $item
-    )
-
-    Remove-Item -Recurse -Force $item;
-}
-
-function Get-Storage {
-    <#
-    .SYNOPSIS
-        Returns info on free and used storage space in the C:\ drive
-    .DESCRIPTION
-        ditto SYNOPSIS
-    .LINK
-        Be sure to check out more of my code experiments on https://github.com/17lxve
-    #>
-    param ()
-    Get-PSDrive C
-}
-
-function Get-OfficeKey {
-    <#
-.SYNOPSIS
-    Activates Office/Windows
-.DESCRIPTION
-    Uses the MassGrave algorithm to force unlock Windows 10/11, or Microsoft Office.
-    User will receive prompts through a GUI to decide on which elements he wishes to activate.
-.LINK
-    Be sure to check out more of my code experiments on https://github.com/17lxve
-#>
-    Invoke-RestMethod https://massgrave.dev/get | Invoke-Expression;
-    # Invoke-RestMethod https://get.activated.win | Invoke-Expression;
-}
+# ============================================================================
+# FUNCTIONS (Alphabetical Order)
+# ============================================================================
 
 function Connect-Wifi {
-    # Write docs
     param (
         [Parameter(Mandatory)]
         [string]
@@ -136,13 +37,11 @@ function Connect-Wifi {
 }
 
 function Disconnect-Wifi {
-    # Write docs
     param ()
     netsh.exe wlan disconnect
 }
 
 function Edit-Policy {
-    # Write docs
     param (
         [Parameter()]
         [string]
@@ -191,6 +90,26 @@ function Find-FromPort {
     Invoke-Expression "netstat -ano | findstr :$($port)"
 }
 
+function Find-HTTPSUrl {
+    param (
+        [Parameter(Mandatory)]
+        [string]
+        $url
+    )
+    $url = $url -replace ':', '/'
+    $url = $url -replace 'git@', 'https://'
+    $url
+}
+
+function Find-Port {
+    param(
+        [Parameter(Mandatory)]
+        [string]
+        $processId
+    )
+    (Get-NetTcpConnection -OwningProcess $processId | Select-Object LocalPort).LocalPort
+}
+
 function Find-WifiKey {
     param (
         [Parameter()]
@@ -200,41 +119,72 @@ function Find-WifiKey {
     Invoke-Expression "netsh wlan show profile $($name) key=clear | findstr Key"
 }
 
+function Get-DefaultBrowserName {
+    $browserRegPath = 'HKCU:\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice'
+    $browserProgId = (Get-ItemProperty $browserRegPath).ProgId
+
+    switch ($browserProgId) {
+        "ChromeHTML" { return "Google Chrome" }
+        "FirefoxURL" { return "Mozilla Firefox" }
+        "IE.HTTP"    { return "Microsoft Edge (or Internet Explorer)" }
+        "MSEdgeBHTM" { return "Microsoft Edge" }
+        "HeliumHTM.VJJYHVVQDE56KG4TNASJ5NYUZU" { return "Helium"}
+        default { return "Unknown or non-standard browser (ProgId: $browserProgId)" }
+    }
+}
+
+function Get-DefaultBrowserPath {
+    $browserRegPath = 'HKCU:\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice'
+    $browserProgId = (Get-ItemProperty $browserRegPath).ProgId
+    $regPath = "Registry::HKEY_CLASSES_ROOT\$browserProgId\shell\open\command"
+    $browserObj = Get-ItemProperty $regPath
+    # Extract just the executable path from the command string
+    $browserObj.'(default)' -replace '^"([^"]+)".*$', '$1' -replace '^([^\s]+).*$', '$1'
+}
+
+function Get-GitSSH {
+    param (
+        [Parameter(Mandatory)]
+        [string]
+        $project
+    )
+    $command = "git clone git@github.com:abjshawty/${project}.git";
+    Invoke-Expression $command;
+}
+
 function Get-Ip {
-    # Write docs
     param()
     $out = (ipconfig.exe | findstr.exe 'IPv4')
     Write-Output ($out | findstr.exe '\.1\.')
 }
 
-function Push-Git {
-    # Write docs
-    param(
-        [Parameter(ValueFromRemainingArguments = $true)]
-        [string[]]
-        $message
-    )
-    if ($null -eq $message) {
-        Write-Output "Message is missing! Please add a message!"
-    }
-    else {
-        git add *
-        git commit -m "$message"
-        git push
-    }
+function Get-OfficeKey {
+    <#
+    .SYNOPSIS
+    Activates Office/Windows
+    .DESCRIPTION
+    Uses the MassGrave algorithm to force unlock Windows 10/11, or Microsoft Office.
+    User will receive prompts through a GUI to decide on which elements he wishes to activate.
+    .LINK
+    Be sure to check out more of my code experiments on https://github.com/17lxve
+    #>
+    Invoke-RestMethod https://massgrave.dev/get | Invoke-Expression;
 }
 
-function Set-LocationDev {
-    Set-Location $dev;
-}
-
-function Set-MongoDBReplicaSet {
-    # mongosh.exe --eval db.
-    mongod --replSet rs0 --port 27017 --dbpath "C:\Program Files\MongoDB\Server\6.0\data"
+function Get-Storage {
+    <#
+    .SYNOPSIS
+        Returns info on free and used storage space in the C:\ drive
+    .DESCRIPTION
+        ditto SYNOPSIS
+    .LINK
+        Be sure to check out more of my code experiments on https://github.com/17lxve
+    #>
+    param ()
+    Get-PSDrive C
 }
 
 function New-File {
-    # Write docs
     param(
         [Parameter()]
         [string]
@@ -340,24 +290,38 @@ function New-NodeApp {
     }
 }
 
-function Update-NodeApp {
-    Invoke-Expression "npx npm-check-updates -u"
+function Open-Origin {
+    $url = git remote get-url origin
+    $https = Find-HTTPSUrl -url $url
+    & (Get-DefaultBrowserPath) $https
 }
 
-function Invoke-JavaProgram {
-    # TODO
-    param (
-        [Parameter()]
-        [string]
-        $x
+function Push-Git {
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]
+        $message
     )
-    C:\Users\Timmy\Documents\jdk-16\bin\javac.exe $x".java"
-    C:\Users\Timmy\Documents\jdk-16\bin\java.exe $x
-    Remove-Item $x".class";
+    if ($null -eq $message) {
+        Write-Output "Message is missing! Please add a message!"
+    }
+    else {
+        git add *
+        git commit -m "$message"
+        git push
+    }
+}
+
+function Remove-Folder {
+    param(
+        [Parameter(Mandatory)]
+        [string]
+        $item
+    )
+    Remove-Item -Recurse -Force $item;
 }
 
 function Search-History {
-    # Write docs
     param (
         [Parameter()]
         [string]
@@ -366,10 +330,16 @@ function Search-History {
     Get-Content (Get-PSReadlineOption).HistorySavePath | Where-Object { $_ -like "*${search_text}*" }    
 }
 
-function Set-PowerOff {
-    # TODO
-    param()
-    python C:\Users\Timmy\Documents\snippets\windows\go_to_bed.py
+function Set-LocationDev {
+    Set-Location $dev;
+}
+
+function sym { cmd.exe /c mklink /H $args }
+function ls { eza --icons $args }
+function lt { eza --icons --tree --level=2 $args }
+
+function Update-NodeApp {
+    Invoke-Expression "npx npm-check-updates -u"
 }
 
 function Update-PythonModules {
@@ -377,35 +347,35 @@ function Update-PythonModules {
     & $PSScriptRoot/update_python_modules.ps1
 }
 
-Set-Alias pum Update-PythonModules
-Set-Alias e explorer.exe
-Set-Alias v nvim.exe
-Set-Alias c windsurf
-Set-Alias w winget
-Set-Alias b (Get-DefaultBrowserPath)
-Set-Alias o Open-Origin
-Set-Alias keygen ssh-keygen
-Set-Alias vim nvim.exe
-Set-Alias surf windsurf
-Set-Alias poweroff Set-PowerOff
-Set-Alias ssh_url Find-HTTPSUrl
-Set-Alias origin Open-Origin
-Set-Alias port Find-port
+# ============================================================================
+# ALIASES (Alphabetical Order)
+# ============================================================================
+
+Set-Alias b Get-DefaultBrowserPath
 Set-Alias clone Get-GitSSH
 Set-Alias connect Connect-Wifi
-Set-Alias disconnect Disconnect-Wifi
-Set-Alias unlock Get-OfficeKey
-Set-Alias swap Edit-Policy
-Set-Alias rmdir Remove-Folder
-Set-Alias pid Find-FromPort
+Set-Alias c windsurf
 Set-Alias dev Set-LocationDev
-Set-Alias mongors Set-MongoDBReplicaSet
-Set-Alias push Push-Git
+Set-Alias disconnect Disconnect-Wifi
+Set-Alias e explorer.exe
+Set-Alias init New-NodeApp
 Set-Alias ip Get-Ip
 Set-Alias key Find-WifiKey
-Set-Alias init New-NodeApp
+Set-Alias keygen ssh-keygen
+Set-Alias o Open-Origin
+Set-Alias pid Find-FromPort
+Set-Alias port Find-Port
+Set-Alias pum Update-PythonModules
+Set-Alias push Push-Git
+Set-Alias rmdir Remove-Folder
 Set-Alias search Search-History
-Set-Alias touch New-File
+Set-Alias ssh_url Find-HTTPSUrl
 Set-Alias storage Get-Storage
-Set-Alias run Invoke-JavaProgram
+Set-Alias swap Edit-Policy
+Set-Alias surf windsurf
+Set-Alias touch New-File
+Set-Alias unlock Get-OfficeKey
 Set-Alias update Update-NodeApp
+Set-Alias v nvim.exe
+Set-Alias vim nvim.exe
+Set-Alias w winget
