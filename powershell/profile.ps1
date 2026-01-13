@@ -145,7 +145,8 @@ function Connect-Wifi {
                 if (-not $connected) {
                     Write-Warning "Connection timeout after $waitTime seconds (attempt $attempt)"
                 }
-            } else {
+            }
+            else {
                 Write-Warning "Connection command failed (attempt $attempt): $result"
             }
             
@@ -196,7 +197,8 @@ function Disconnect-Wifi {
         
         if ($LASTEXITCODE -eq 0) {
             Write-Output "Successfully disconnected from WiFi network"
-        } else {
+        }
+        else {
             Write-Error "Failed to disconnect from WiFi. Exit code: $LASTEXITCODE"
             Write-Warning "Output: $result"
         }
@@ -365,9 +367,9 @@ function Get-DefaultBrowserName {
     switch ($browserProgId) {
         "ChromeHTML" { return "Google Chrome" }
         "FirefoxURL" { return "Mozilla Firefox" }
-        "IE.HTTP"    { return "Microsoft Edge (or Internet Explorer)" }
+        "IE.HTTP" { return "Microsoft Edge (or Internet Explorer)" }
         "MSEdgeBHTM" { return "Microsoft Edge" }
-        "HeliumHTM.VJJYHVVQDE56KG4TNASJ5NYUZU" { return "Helium"}
+        "HeliumHTM.VJJYHVVQDE56KG4TNASJ5NYUZU" { return "Helium" }
         default { return "Unknown or non-standard browser (ProgId: $browserProgId)" }
     }
 }
@@ -430,11 +432,11 @@ function Get-GitSSH {
         
         [Parameter()]
         [ValidateScript({
-            if (-not (Test-Path $_ -PathType Container)) {
-                throw "Destination directory '$_' does not exist"
-            }
-            $true
-        })]
+                if (-not (Test-Path $_ -PathType Container)) {
+                    throw "Destination directory '$_' does not exist"
+                }
+                $true
+            })]
         [string]
         $Destination = ".",
         
@@ -474,10 +476,12 @@ function Get-GitSSH {
                 Write-Warning "Run 'ssh-keygen -t ed25519 -C \"your_email@example.com\"' to generate a key"
                 Write-Warning "Then add the public key to your GitHub account"
                 return
-            } elseif ($sshTest -match "not found") {
+            }
+            elseif ($sshTest -match "not found") {
                 Write-Error "Repository '${Username}/${Project}' does not exist or is not accessible"
                 return
-            } else {
+            }
+            else {
                 Write-Error "SSH connection failed: $sshTest"
                 return
             }
@@ -497,16 +501,19 @@ function Get-GitSSH {
                 $choice = Read-Host "Do you want to remove it and clone fresh? (y/N)"
                 if ($choice -match '^[Yy]') {
                     Remove-Item -Path $destPath -Recurse -Force
-                } else {
+                }
+                else {
                     Write-Output "Clone cancelled"
                     return
                 }
-            } else {
+            }
+            else {
                 Write-Warning "Directory exists but is not a git repository"
                 $choice = Read-Host "Do you want to remove it and clone? (y/N)"
                 if ($choice -match '^[Yy]') {
                     Remove-Item -Path $destPath -Recurse -Force
-                } else {
+                }
+                else {
                     Write-Output "Clone cancelled"
                     return
                 }
@@ -546,15 +553,18 @@ function Get-GitSSH {
                     Pop-Location
                 }
             }
-        } else {
+        }
+        else {
             Write-Error "Failed to clone repository '$Project'"
             Write-Warning "Git output: $result"
             
             if ($result -match "Repository not found") {
                 Write-Warning "Repository '${Username}/${Project}' does not exist or is not accessible"
-            } elseif ($result -match "already exists") {
+            }
+            elseif ($result -match "already exists") {
                 Write-Warning "Directory already exists and could not be removed"
-            } elseif ($result -match "Permission denied") {
+            }
+            elseif ($result -match "Permission denied") {
                 Write-Warning "Permission denied. Check SSH key configuration."
             }
         }
@@ -638,14 +648,14 @@ function New-File {
         
         [Parameter()]
         [ValidateScript({
-            if (-not (Test-Path $_ -PathType Container)) {
-                throw "Directory '$_' does not exist"
-            }
-            if (-not (Test-Path $_ -PathType Container)) {
-                throw "Path '$_' is not a directory"
-            }
-            $true
-        })]
+                if (-not (Test-Path $_ -PathType Container)) {
+                    throw "Directory '$_' does not exist"
+                }
+                if (-not (Test-Path $_ -PathType Container)) {
+                    throw "Path '$_' is not a directory"
+                }
+                $true
+            })]
         [string]
         $Path = ".",
         
@@ -667,11 +677,13 @@ function New-File {
             if ($Name -match '\\.[^.]+$') {
                 # Name already has extension, replace it
                 $fileName = [System.IO.Path]::GetFileNameWithoutExtension($Name) + $Extension
-            } else {
+            }
+            else {
                 # Add extension
                 $fileName = $Name + $Extension
             }
-        } else {
+        }
+        else {
             $fileName = $Name
         }
         
@@ -697,7 +709,8 @@ function New-File {
             if ($Force) {
                 Write-Verbose "Overwriting existing file: $fullPath"
                 Remove-Item $fullPath -Force -ErrorAction Stop
-            } else {
+            }
+            else {
                 Write-Warning "File already exists: $fullPath"
                 $choice = Read-Host "Do you want to overwrite the existing file? (y/N)"
                 if ($choice -notmatch '^[Yy]') {
@@ -870,7 +883,8 @@ function Open-Origin {
         
         if ($LASTEXITCODE -eq 0) {
             Write-Output "Opened repository in browser: $https"
-        } else {
+        }
+        else {
             Write-Error "Failed to open browser"
             Write-Warning "Browser path: $browserPath"
             Write-Warning "URL: $https"
@@ -980,7 +994,8 @@ function Push-Git {
             
             if ($commitResult -match "nothing to commit") {
                 Write-Warning "No changes were staged for commit"
-            } elseif ($commitResult -match "empty commit message") {
+            }
+            elseif ($commitResult -match "empty commit message") {
                 Write-Warning "Commit message cannot be empty"
             }
             return
@@ -1021,9 +1036,9 @@ function Push-Git {
             Write-Verbose "Remote: $Remote"
             
             # Check if push would be force push
-            $trackingBranch = git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>$null
+            $trackingBranch = git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null
             if ($LASTEXITCODE -eq 0 -and $trackingBranch) {
-                $ahead = git rev-list --count --left-right @{u}...HEAD 2>$null
+                $ahead = git rev-list --count --left-right '@{u}...HEAD' 2>$null
                 if ($LASTEXITCODE -eq 0 -and $ahead -match '^\d+\s+(\d+)$') {
                     $commitsAhead = [int]$matches[1]
                     if ($commitsAhead -gt 10) {
@@ -1045,26 +1060,32 @@ function Push-Git {
                 if ($LASTEXITCODE -eq 0) {
                     Write-Output "Successfully pushed changes to remote"
                     Write-Output "Remote: $Remote, Branch: $branch"
-                } else {
+                }
+                else {
                     Write-Error "Failed to push changes to remote"
                     Write-Warning "Git output: $pushResult"
                     
                     if ($pushResult -match "Authentication failed") {
                         Write-Warning "Git authentication failed. Check your credentials."
-                    } elseif ($pushResult -match "no such remote") {
+                    }
+                    elseif ($pushResult -match "no such remote") {
                         Write-Warning "Remote '$Remote' does not exist"
-                    } elseif ($pushResult -match "Updates were rejected") {
+                    }
+                    elseif ($pushResult -match "Updates were rejected") {
                         Write-Warning "Push rejected. Try pulling latest changes first: git pull $Remote $branch"
-                    } elseif ($pushResult -match "fatal: couldn't find remote ref") {
+                    }
+                    elseif ($pushResult -match "fatal: couldn't find remote ref") {
                         Write-Warning "Branch '$branch' may not exist on remote. Try: git push -u $Remote $branch"
                     }
                     
                     Write-Warning "Changes were committed locally but not pushed"
                 }
-            } else {
+            }
+            else {
                 Write-Output "Push cancelled (WhatIf mode)"
             }
-        } else {
+        }
+        else {
             Write-Output "Changes committed locally (push skipped)"
         }
     }
@@ -1098,35 +1119,35 @@ function Remove-Folder {
         [Parameter(Mandatory, Position = 0, ValueFromPipeline = $true)]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({
-            # Check for invalid characters
-            $invalidChars = [IO.Path]::GetInvalidPathChars()
-            if ($_.IndexOfAny($invalidChars) -ge 0) {
-                throw "Path contains invalid characters: $_"
-            }
-            
-            # Check path length
-            if ($_.Length -gt 260) {
-                throw "Path too long (max 260 characters): $_"
-            }
-            
-            # Check for dangerous system paths
-            $dangerousPaths = @(
-                $env:WINDIR,
-                $env:PROGRAMFILES,
-                $env:PROGRAMFILES(X86),
-                "C:\\",
-                "\\\\",
-                $env:USERPROFILE
-            )
-            
-            foreach ($dangerPath in $dangerousPaths) {
-                if ($dangerPath -and $_.StartsWith($dangerPath, [StringComparison]::OrdinalIgnoreCase)) {
-                    throw "Dangerous path detected: $_. Removing system directories is not allowed."
+                # Check for invalid characters
+                $invalidChars = [IO.Path]::GetInvalidPathChars()
+                if ($_.IndexOfAny($invalidChars) -ge 0) {
+                    throw "Path contains invalid characters: $_"
                 }
-            }
             
-            $true
-        })]
+                # Check path length
+                if ($_.Length -gt 260) {
+                    throw "Path too long (max 260 characters): $_"
+                }
+            
+                # Check for dangerous system paths
+                $dangerousPaths = @(
+                    $env:WINDIR,
+                    $env:PROGRAMFILES,
+                    $env:PROGRAMFILES_X86,
+                    "C:\\",
+                    "\\\\",
+                    $env:USERPROFILE
+                )
+            
+                foreach ($dangerPath in $dangerousPaths) {
+                    if ($dangerPath -and $_.StartsWith($dangerPath, [StringComparison]::OrdinalIgnoreCase)) {
+                        throw "Dangerous path detected: $_. Removing system directories is not allowed."
+                    }
+                }
+            
+                $true
+            })]
         [string[]]
         $Path,
         
@@ -1263,23 +1284,23 @@ function Set-LocationDev {
     param(
         [Parameter()]
         [ValidateScript({
-            if ([string]::IsNullOrWhiteSpace($_)) {
-                return $true  # Allow empty to use $workspace
-            }
+                if ([string]::IsNullOrWhiteSpace($_)) {
+                    return $true  # Allow empty to use $workspace
+                }
             
-            # Check for invalid characters
-            $invalidChars = [IO.Path]::GetInvalidPathChars()
-            if ($_.IndexOfAny($invalidChars) -ge 0) {
-                throw "Path contains invalid characters: $_"
-            }
+                # Check for invalid characters
+                $invalidChars = [IO.Path]::GetInvalidPathChars()
+                if ($_.IndexOfAny($invalidChars) -ge 0) {
+                    throw "Path contains invalid characters: $_"
+                }
             
-            # Check path length
-            if ($_.Length -gt 260) {
-                throw "Path too long (max 260 characters): $_"
-            }
+                # Check path length
+                if ($_.Length -gt 260) {
+                    throw "Path too long (max 260 characters): $_"
+                }
             
-            $true
-        })]
+                $true
+            })]
         [string]
         $Path = "",
         
@@ -1292,7 +1313,8 @@ function Set-LocationDev {
         # Determine target path
         $targetPath = if ([string]::IsNullOrWhiteSpace($Path)) {
             $workspace
-        } else {
+        }
+        else {
             $Path
         }
         
@@ -1317,7 +1339,8 @@ function Set-LocationDev {
                     Write-Error "Failed to create directory '$targetPath': $($_.Exception.Message)"
                     return
                 }
-            } else {
+            }
+            else {
                 Write-Error "Directory does not exist: $targetPath"
                 Write-Warning "The directory may have been moved or deleted"
                 Write-Warning "Current \$workspace value: $workspace"
@@ -1465,7 +1488,8 @@ function Test-ProfileFunctions {
             if (Test-Path $testFile) {
                 $testResults += "PASS: New-File enhanced params: Success"
                 $testFiles += $testFile
-            } else {
+            }
+            else {
                 $testResults += "FAIL: New-File enhanced params: File not created"
             }
         }
@@ -1551,7 +1575,8 @@ function Test-ProfileFunctions {
                 $testResults += "PASS: Set-LocationDev create: Success"
                 # Clean up
                 Remove-Item $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            } else {
+            }
+            else {
                 $testResults += "FAIL: Set-LocationDev create: Directory not created"
             }
         }
@@ -1568,14 +1593,16 @@ function Test-ProfileFunctions {
                 $url = git remote get-url origin 2>$null
                 if ($LASTEXITCODE -eq 0) {
                     $testResults += "PASS: Git environment: Repository detected"
-                } else {
+                }
+                else {
                     $testResults += "SKIP: Git environment: No origin remote"
                 }
             }
             catch {
                 $testResults += "SKIP: Git environment: Error checking - $($_.Exception.Message)"
             }
-        } else {
+        }
+        else {
             $testResults += "SKIP: Git environment: Not in git repository"
         }
         
@@ -1609,9 +1636,11 @@ function Test-ProfileFunctions {
     foreach ($result in $testResults) {
         if ($result.StartsWith("PASS:")) {
             Write-Host $result -ForegroundColor Green
-        } elseif ($result.StartsWith("FAIL:")) {
+        }
+        elseif ($result.StartsWith("FAIL:")) {
             Write-Host $result -ForegroundColor Red
-        } else {
+        }
+        else {
             Write-Host $result -ForegroundColor Yellow
         }
     }
