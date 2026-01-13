@@ -21,6 +21,31 @@ if (Test-Path alias:ls) { Remove-Item alias:ls }
 # FUNCTIONS (Alphabetical Order)
 # ============================================================================
 
+function Update-PythonModules {
+    <#
+    .SYNOPSIS
+        Updates all installed Python packages to their latest versions.
+    .DESCRIPTION
+        Gets a list of all installed Python packages and upgrades each one.
+        Uses pip to list packages and then upgrades them individually.
+    .EXAMPLE
+        Update-PythonModules
+        Updates all installed Python packages
+    #>
+    param()
+    $temp = py -m pip list
+    $res = $temp.replace('0', '')
+    for ($x = 0; $x -lt 10; $x++) {
+        $res = $res.replace($x.ToString(), '')
+    }
+    $res = $res.replace('.', '')
+    $res = $res.replace('Package                   Version', '')
+    $res = $res.replace('------------------------- ---------', '')
+    foreach ($x in $res) {
+        py -m pip install --upgrade $x
+    }
+}
+
 function Connect-Wifi {
     <#
     .SYNOPSIS
@@ -786,42 +811,44 @@ function New-NodeApp {
     )
 
     # Default options available
-    $frameworks_npm = @{
-        "expo"          = "npx create-expo@latest ${Name}";
-        "react"         = "npx create-vite@latest ${Name} -- --template react-ts";
-        "svelte"        = "npx create-vite@latest ${Name} -- --template svelte-ts";
-        "solid"         = "npx create-vite@latest ${Name} -- --template solid-ts";
-        "qwik"          = "npx create-vite@latest ${Name} -- --template qwik-ts";
-        "lit"           = "npx create-vite@latest ${Name} -- --template lit-ts";
-        "react-no-vite" = "npx create-react-app@latest ${Name} --use-npm";
-        "next"          = "npx create-next-app@latest ${Name} --use-npm";
-        "vue"           = "npm init vue@latest ${Name}";
-        "vite-express"  = "npx create-vite-express@latest ${Name}";
-        "server"        = "gh repo create ${Name} --template abjshawty/server --private --clone";
-        "test"          = "Write-Output 'I survived 2023 just to die at GREYDAY'"
-        "help"          = "Get-Help New-NodeApp"
+    if ($PackageManager -eq "npm") {
+        $commands = @{
+            "expo"          = "npx create-expo@latest ${Name}";
+            "react"         = "npx create-vite@latest ${Name} -- --template react-ts";
+            "svelte"        = "npx create-vite@latest ${Name} -- --template svelte-ts";
+            "solid"         = "npx create-vite@latest ${Name} -- --template solid-ts";
+            "qwik"          = "npx create-vite@latest ${Name} -- --template qwik-ts";
+            "lit"           = "npx create-vite@latest ${Name} -- --template lit-ts";
+            "react-no-vite" = "npx create-react-app@latest ${Name} --use-npm";
+            "next"          = "npx create-next-app@latest ${Name} --use-npm";
+            "vue"           = "npm init vue@latest ${Name}";
+            "vite-express"  = "npx create-vite-express@latest ${Name}";
+            "server"        = "gh repo create ${Name} --template abjshawty/server --private --clone";
+            "test"          = "Write-Output 'I survived 2023 just to die at GREYDAY'"
+            "help"          = "Get-Help New-NodeApp"
+        }
     }
-    $frameworks_yarn = @{
-        "expo"          = "yarn dlx create-expo@latest ${Name}";
-        "react"         = "yarn dlx create-vite@latest ${Name} -- --template react-ts";
-        "svelte"        = "yarn dlx create-vite@latest ${Name} -- --template svelte-ts";
-        "solid"         = "yarn dlx create-vite@latest ${Name} -- --template solid-ts";
-        "qwik"          = "yarn dlx create-vite@latest ${Name} -- --template qwik-ts";
-        "lit"           = "yarn dlx create-vite@latest ${Name} -- --template lit-ts";
-        "react-no-vite" = "yarn dlx create-react-app@latest ${Name} --use-npm";
-        "next"          = "yarn dlx create-next-app@latest ${Name} --use-npm";
-        "vue"           = "yarn init vue@latest ${Name}";
-        "vite-express"  = "yarn dlx create-vite-express@latest ${Name}";
-        "server"        = "gh repo create ${Name} --template abjshawty/server --private --clone";
-        "test"          = "Write-Output 'I survived 2025 just to die at GREYDAY'"
-        "help"          = "Get-Help New-NodeApp"
+    else {
+        $commands = @{
+            "expo"          = "yarn dlx create-expo@latest ${Name}";
+            "react"         = "yarn dlx create-vite@latest ${Name} -- --template react-ts";
+            "svelte"        = "yarn dlx create-vite@latest ${Name} -- --template svelte-ts";
+            "solid"         = "yarn dlx create-vite@latest ${Name} -- --template solid-ts";
+            "qwik"          = "yarn dlx create-vite@latest ${Name} -- --template qwik-ts";
+            "lit"           = "yarn dlx create-vite@latest ${Name} -- --template lit-ts";
+            "react-no-vite" = "yarn dlx create-react-app@latest ${Name} --use-npm";
+            "next"          = "yarn dlx create-next-app@latest ${Name} --use-npm";
+            "vue"           = "yarn init vue@latest ${Name}";
+            "vite-express"  = "yarn dlx create-vite-express@latest ${Name}";
+            "server"        = "gh repo create ${Name} --template abjshawty/server --private --clone";
+            "test"          = "Write-Output 'I survived 2025 just to die at GREYDAY'"
+            "help"          = "Get-Help New-NodeApp"
+        }
     }
     Write-Output "Starting...`n"
     # Run
     try {
-        $variableName = "frameworks_$PackageManager"
-        Write-Output $variableName
-        Invoke-Expression ((Get-Variable $variableName).Value[$Framework])
+        Invoke-Expression ($commands[$Framework])
     }
     catch {
         Write-Error "Bro, there was an error here: $($_.Exception.Message)"
@@ -1431,21 +1458,6 @@ function Update-NodeApp {
         Updates all dependencies in package.json to latest versions
     #>
     Invoke-Expression "npx npm-check-updates -u"
-}
-
-function Update-PythonModules {
-    <#
-    .SYNOPSIS
-        Updates Python modules using a separate script.
-    .DESCRIPTION
-        Executes the update_python_modules.ps1 script located in the same directory
-        as this profile to update Python packages and modules.
-    .EXAMPLE
-        Update-PythonModules
-        Runs the Python module update script
-    #>
-    param()
-    & $PSScriptRoot/update_python_modules.ps1
 }
 
 # ============================================================================
