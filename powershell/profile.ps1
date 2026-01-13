@@ -1,12 +1,10 @@
 # Variables
-
-$dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;
-
-oh-my-posh init pwsh --config "material" | Invoke-Expression
+$dev = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName;;
+try { oh-my-posh init pwsh --config "material" | Invoke-Expression } catch { };
 
 # Cleanup
-Remove-Item alias:rmdir
-Remove-Item alias:ls
+if (Test-Path alias:rmdir) { Remove-Item alias:rmdir };
+if (Test-Path alias:ls) { Remove-Item alias:ls };
 
 function ls { eza --icons $args }
 function lt { eza --icons --tree --level=2 $args }
@@ -15,11 +13,41 @@ Set-Alias e explorer.exe
 Set-Alias v nvim.exe
 Set-Alias c windsurf
 Set-Alias w winget
-Set-Alias b "C:\\Program Files\\Zen Browser\\zen.exe"
+Set-Alias b (Get-DefaultBrowserPath)
 Set-Alias o Open-Origin
 Set-Alias keygen ssh-keygen
 # cmd.exe /c mklink /H .wezterm.lua C:\Users\kouad\dev  
 # Functions
+
+function Get-DefaultBrowserName {
+    $browserRegPath = 'HKCU:\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice'
+    $browserProgId = (Get-ItemProperty $browserRegPath).ProgId
+
+    switch ($browserProgId) {
+        "ChromeHTML" { return "Google Chrome" }
+        "FirefoxURL" { return "Mozilla Firefox" }
+        "IE.HTTP"    { return "Microsoft Edge (or Internet Explorer)" }
+        "MSEdgeBHTM" { return "Microsoft Edge" }
+        "HeliumHTM.VJJYHVVQDE56KG4TNASJ5NYUZU" { return "Helium"}
+        # Add other cases for different browsers if needed
+        default { return "Unknown or non-standard browser (ProgId: $browserProgId)" }
+    }
+}
+
+function Get-DefaultBrowserPath {
+    $browserRegPath = 'HKCU:\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice'
+    $browserProgId = (Get-ItemProperty $browserRegPath).ProgId
+    $regPath = "Registry::HKEY_CLASSES_ROOT\$browserProgId\shell\open\command"
+    $browserObj = Get-ItemProperty $regPath
+    # Extract just the executable path from the command string
+    $browserObj.'(default)' -replace '^"([^"]+)".*$', '$1' -replace '^([^\s]+).*$', '$1'
+}
+
+# Example usage:
+# Write-Host "The current default browser is:" (Get-DefaultBrowserName);
+# Write-Host "The current default browser path is:" (Get-DefaultBrowserPath);
+
+
 function Find-HTTPSUrl {
     param (
         [Parameter(Mandatory)]
