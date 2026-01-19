@@ -1,7 +1,7 @@
 local wezterm = require("wezterm")
 local config = wezterm.config_builder()
 
-config.font_size = 10
+config.font_size = 9
 config.enable_tab_bar = false
 config.window_decorations = "RESIZE" -- "TITLE | RESIZE"
 config.color_scheme = 'Tokyo Night'
