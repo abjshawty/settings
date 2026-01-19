@@ -7,8 +7,9 @@ Do not clone this to a shared workstation, as it contains much private data.
 ## Using it
 
 Find your $Profile file via powershell, then paste:
+
 ```
-. C:\Users\othniel.kouadio\dev\settings\powershell\profile.ps1
+. $HOME\dev\settings\powershell\profile.ps1
 ```
 
 Every new powershell instance will now load the scripts on launch.
