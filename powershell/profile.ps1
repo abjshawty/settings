@@ -1685,6 +1685,7 @@ Set-Alias init New-NodeApp
 Set-Alias ip Get-Ip
 Set-Alias key Find-WifiKey
 Set-Alias keygen ssh-keygen
+Set-Alias mklink sym
 Set-Alias o Open-Origin
 Set-Alias pid Find-FromPort
 Set-Alias port Find-Port
