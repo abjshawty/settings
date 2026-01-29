@@ -1674,6 +1674,7 @@ function Test-ProfileFunctions {
 # ============================================================================
 
 Set-Alias b Get-DefaultBrowserPath
+Set-Alias bi "bun install"
 Set-Alias cd z
 Set-Alias clone Get-GitSSH
 Set-Alias connect Connect-Wifi
