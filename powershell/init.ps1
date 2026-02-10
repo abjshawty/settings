@@ -103,3 +103,5 @@ function Initialize-Environment {
     
     Write-Host "Environment initialization completed!" -ForegroundColor Magenta
 }
+
+Initialize-Environment;
