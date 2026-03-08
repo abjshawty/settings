@@ -12,7 +12,7 @@ eza-community.eza
 Git.Git
 GitHub.cli
 Golang.Go
-JaneDeDobbeleer.OhMyPosh
+JanDeDobbeleer.OhMyPosh
 junegunn.fzf
 MongoDB.Compass.Full
 Mozilla.Thunderbird
