@@ -20,6 +20,7 @@ Neovim.Neovim
 Notion.Notion
 Python.Python.3.13
 Rustlang.Rustup
+sharkdp.bat
 Spotify.Spotify
 Valve.Steam
 wez.wezterm
