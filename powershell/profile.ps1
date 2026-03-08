@@ -1674,11 +1674,12 @@ function Test-ProfileFunctions {
 # ============================================================================
 
 Set-Alias b Get-DefaultBrowserPath
-Set-Alias bi "bun install"
+# Set-Alias bi "bun install"
 Set-Alias cd z
 Set-Alias clone Get-GitSSH
 Set-Alias connect Connect-Wifi
 Set-Alias c windsurf
+Set-Alias cc claude
 Set-Alias dev Set-LocationDev
 Set-Alias disconnect Disconnect-Wifi
 Set-Alias e explorer.exe
@@ -1692,7 +1693,8 @@ Set-Alias pid Find-FromPort
 Set-Alias port Find-Port
 Set-Alias pum Update-PythonModules
 Set-Alias push Push-Git
-Set-Alias rmdir Remove-Folder
+Set-Alias rl railway
+set-alias rmdir remove-folder
 Set-Alias search Search-History
 Set-Alias ssh_url Find-HTTPSUrl
 Set-Alias storage Get-Storage
