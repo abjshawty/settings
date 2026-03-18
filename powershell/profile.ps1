@@ -19,7 +19,7 @@ zoxide.exe init powershell | Out-String | Invoke-Expression 2>$null
 if (Test-Path alias:rmdir) { Remove-Item alias:rmdir }
 if (Test-Path alias:ls) { Remove-Item alias:ls }
 if (Test-Path alias:cd) { Remove-Item alias:cd }
-
+if (Test-Path alias:curl) {Remove-Item alias:curl}
 # ============================================================================
 # FUNCTIONS (Alphabetical Order)
 # ============================================================================
@@ -643,6 +643,22 @@ function Get-Storage {
     #>
     param ()
     Get-PSDrive C
+}
+
+function c {
+    if ($args.Count -eq 0) {
+        windsurf.exe .
+    } else {
+        windsurf.exe $args
+    }
+}
+
+function n { 
+    if ($args.Count -eq 0) {
+        nvim.exe .
+    } else {
+        nvim.exe $args
+    }
 }
 
 function New-File {
@@ -1678,7 +1694,6 @@ Set-Alias b Get-DefaultBrowserPath
 Set-Alias cd z
 Set-Alias clone Get-GitSSH
 Set-Alias connect Connect-Wifi
-Set-Alias c windsurf
 Set-Alias cc claude
 Set-Alias dev Set-LocationDev
 Set-Alias disconnect Disconnect-Wifi
