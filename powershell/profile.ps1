@@ -661,6 +661,13 @@ function n {
     }
 }
 
+function win { 
+    if ($args.Count -eq 0) {
+        winget update --all
+    } else {
+        winget install $args
+    }
+}
 function New-File {
     <#
     .SYNOPSIS
@@ -1698,6 +1705,7 @@ Set-Alias cc claude
 Set-Alias dev Set-LocationDev
 Set-Alias disconnect Disconnect-Wifi
 Set-Alias e explorer.exe
+Set-Alias lzg lazygit
 Set-Alias init New-NodeApp
 Set-Alias ip Get-Ip
 Set-Alias key Find-WifiKey

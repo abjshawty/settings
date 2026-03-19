@@ -13,6 +13,7 @@ Git.Git
 GitHub.cli
 Golang.Go
 JanDeDobbeleer.OhMyPosh
+JesseDuffield.lazygit
 junegunn.fzf
 MongoDB.Compass.Full
 Mozilla.Thunderbird
