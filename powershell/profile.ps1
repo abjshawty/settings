@@ -392,13 +392,12 @@ function Get-DefaultBrowserName {
     $browserRegPath = 'HKCU:\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice'
     $browserProgId = (Get-ItemProperty $browserRegPath).ProgId
 
-    switch ($browserProgId) {
-        "ChromeHTML" { return "Google Chrome" }
-        "FirefoxURL" { return "Mozilla Firefox" }
-        "IE.HTTP" { return "Microsoft Edge (or Internet Explorer)" }
-        "MSEdgeBHTM" { return "Microsoft Edge" }
-        "HeliumHTM.VJJYHVVQDE56KG4TNASJ5NYUZU" { return "Helium" }
-        "FirefoxURL-F0DC299D809B9700" { return "Zen Browser" }
+    switch -Regex ($browserProgId) {
+        "^Chrome" { return "Google Chrome" }
+        "^Firefox" { return "Firefox/Zen" }
+        "^MSEdge" { return "Microsoft Edge" }
+        "^IE" { return "Microsoft Edge (or Internet Explorer)" }
+        "Helium" { return "Helium" }
         default { return "Unknown or non-standard browser (ProgId: $browserProgId)" }
     }
 }
@@ -1696,6 +1695,7 @@ function Test-ProfileFunctions {
 # ALIASES (Alphabetical Order)
 # ============================================================================
 
+# Set-Alias b Get-DefaultBrowserPath
 Set-Alias b Get-DefaultBrowserPath
 # Set-Alias bi "bun install"
 Set-Alias cd z
@@ -1705,6 +1705,7 @@ Set-Alias cc claude
 Set-Alias dev Set-LocationDev
 Set-Alias disconnect Disconnect-Wifi
 Set-Alias e explorer.exe
+Set-Alias lzd lazydocker
 Set-Alias lzg lazygit
 Set-Alias init New-NodeApp
 Set-Alias ip Get-Ip

@@ -14,6 +14,7 @@ GitHub.cli
 Golang.Go
 JanDeDobbeleer.OhMyPosh
 JesseDuffield.lazygit
+JesseDuffield.lazydocker
 junegunn.fzf
 MongoDB.Compass.Full
 Mozilla.Thunderbird
@@ -23,6 +24,7 @@ Python.Python.3.13
 Rustlang.Rustup
 sharkdp.bat
 Spotify.Spotify
+SST.opencode
 Valve.Steam
 wez.wezterm
 Zen-Team.Zen-Browser
