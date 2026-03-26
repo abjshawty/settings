@@ -3,7 +3,9 @@
 # ============================================================================
 
 $workspace = ((Get-Item (split-path -parent  $MyInvocation.MyCommand.Definition)).parent.parent).FullName
-
+if (-not $workspace) {
+    $workspace = "$HOME\dev"
+}
 # ============================================================================
 # INITIALIZATION
 # ============================================================================
@@ -36,17 +38,20 @@ function Update-PythonModules {
         Updates all installed Python packages
     #>
     param()
-    $temp = py -m pip list
-    $res = $temp.replace('0', '')
-    for ($x = 0; $x -lt 10; $x++) {
-        $res = $res.replace($x.ToString(), '')
+    py -m pip list --format=json | ConvertFrom-Json | ForEach-Object {
+        py -m pip install --upgrade $_.name
     }
-    $res = $res.replace('.', '')
-    $res = $res.replace('Package                   Version', '')
-    $res = $res.replace('------------------------- ---------', '')
-    foreach ($x in $res) {
-        py -m pip install --upgrade $x
-    }
+    # $temp = py -m pip list
+    # $res = $temp.replace('0', '')
+    # for ($x = 0; $x -lt 10; $x++) {
+    #     $res = $res.replace($x.ToString(), '')
+    # }
+    # $res = $res.replace('.', '')
+    # $res = $res.replace('Package                   Version', '')
+    # $res = $res.replace('------------------------- ---------', '')
+    # foreach ($x in $res) {
+    #     py -m pip install --upgrade $x
+    # }
 }
 
 function Connect-Wifi {
@@ -310,7 +315,7 @@ function Find-FromPort {
         [string]
         $port
     )
-    Invoke-Expression "netstat -ano | findstr :$($port)"
+    netstat -ano | Select-String ":$port"
 }
 
 function Find-HTTPSUrl {
@@ -616,19 +621,6 @@ function Get-Ip {
     param()
     $out = (ipconfig.exe | findstr.exe 'IPv4')
     Write-Output ($out | findstr.exe '\.1\.')
-}
-
-function Get-OfficeKey {
-    <#
-    .SYNOPSIS
-    Activates Office/Windows
-    .DESCRIPTION
-    Uses the MassGrave algorithm to force unlock Windows 10/11, or Microsoft Office.
-    User will receive prompts through a GUI to decide on which elements he wishes to activate.
-    .LINK
-    Be sure to check out more of my code experiments on https://github.com/17lxve
-    #>
-    Invoke-RestMethod https://massgrave.dev/get | Invoke-Expression;
 }
 
 function Get-Storage {

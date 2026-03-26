@@ -4,11 +4,13 @@ local config = wezterm.config_builder()
 config.font_size = 9
 config.enable_tab_bar = false
 config.window_decorations = "TITLE | RESIZE"
-config.color_scheme = "Tokyo Night"
+-- config.color_scheme = "Tokyo Night"
 -- config.color_scheme = "Dark Ocean (terminal.sexy)"
 -- config.color_scheme = "Catppuccin Mocha"
+config.color_scheme = "Matte Black"
 config.window_background_opacity = 0.9
-config.default_prog = { "powershell.exe", "-NoLogo" }
+config.default_prog = { "pwsh.", "-NoLogo" }
+-- config.default_prog = { "powershell.exe", "-NoLogo" }
 config.front_end = "WebGpu"
 config.keys = {
 	{
