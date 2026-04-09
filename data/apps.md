@@ -5,8 +5,11 @@ BurntSushi.ripgrep.MSVC
 Cockos.REAPER
 Codeium.Windsurf
 CoreyButler.NVMforWindows
+cURL.cURL
 DBeaver.DBeaver.Community
+dbrgn.tealdeer
 Discord.Discord
+Docker.DockerDesktop
 EpicGames.EpicGamesLauncher
 eza-community.eza
 Git.Git
@@ -16,6 +19,7 @@ JanDeDobbeleer.OhMyPosh
 JesseDuffield.lazygit
 JesseDuffield.lazydocker
 junegunn.fzf
+Microsoft.PowerShell
 MongoDB.Compass.Full
 Mozilla.Thunderbird
 Neovim.Neovim
