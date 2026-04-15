@@ -1,3 +1,4 @@
+Anthropic.ClaudeCode
 ajeetdsouza.zoxide
 BrechtSanders.WinLibs.POSIX.UCRT
 Bruno.Bruno
