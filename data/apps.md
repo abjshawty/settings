@@ -2,6 +2,7 @@ ajeetdsouza.zoxide
 BrechtSanders.WinLibs.POSIX.UCRT
 Bruno.Bruno
 BurntSushi.ripgrep.MSVC
+charmbracelet.glow
 Cockos.REAPER
 Codeium.Windsurf
 CoreyButler.NVMforWindows
