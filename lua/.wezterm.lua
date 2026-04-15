@@ -65,11 +65,11 @@ config.keys = {
 		mods = "CTRL|ALT",
 		action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
 	},
-	{
-		key = "f",
-		mods = "CTRL|SHIFT",
-		action = wezterm.action.SendString("ɑ"),
-	},
+	-- {
+  -- key = "f",
+  -- mods = "CTRL|SHIFT",
+  -- action = wezterm.action.SendString("ɑ"),
+	-- },
 	{
 		key = "w",
 		mods = "CTRL",
