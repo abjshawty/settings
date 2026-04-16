@@ -1697,8 +1697,10 @@ Set-Alias cc claude
 Set-Alias dev Set-LocationDev
 Set-Alias disconnect Disconnect-Wifi
 Set-Alias e explorer.exe
+Set-Alias lzc lazycurl
 Set-Alias lzd lazydocker
 Set-Alias lzg lazygit
+Set-Alias lzs lazysql
 Set-Alias init New-NodeApp
 Set-Alias ip Get-Ip
 Set-Alias key Find-WifiKey
