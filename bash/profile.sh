@@ -202,6 +202,7 @@ alias la='eza -la --icons'
 alias ip='get_ip'
 alias dev='set_location_dev'
 alias search='search_history'
+alias s='pacman -Ssq | fzf | xargs -o sudo pacman -S'
 
 if command -v nvim &>/dev/null; then
   alias v='nvim'
