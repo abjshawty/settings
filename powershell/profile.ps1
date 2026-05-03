@@ -297,6 +297,34 @@ function Edit-Policy {
     }
 }
 
+function unzip {
+    <#
+    .SYNOPSIS
+        Extracts the contents of a zip file to a specified directory.
+    .DESCRIPTION
+        Uses Expand-Archive to extract zip files.
+    .PARAMETER file
+        The path to the zip file to extract.
+    .PARAMETER destination
+        The directory where files should be extracted (default: current directory).
+    .EXAMPLE
+        unzip "C:\path\to\your\file.zip"
+        Extracts file.zip to current directory
+    .EXAMPLE
+        unzip "C:\path\to\your\file.zip" "C:\extracted\folder"
+        Extracts to specified directory
+    #>
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]
+        $file,
+        [Parameter(Position = 1)]
+        [string]
+        $destination = "."
+    )
+    Expand-Archive -Path $file -DestinationPath $destination -Force
+}
+
 function Find-FromPort {
     <#
     .SYNOPSIS
