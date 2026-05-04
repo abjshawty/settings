@@ -666,9 +666,9 @@ function Get-Storage {
 
 function c {
     if ($args.Count -eq 0) {
-        windsurf.exe .
+        windsurf .
     } else {
-        windsurf.exe $args
+        windsurf $args
     }
 }
 
