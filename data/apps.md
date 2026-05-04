@@ -23,6 +23,7 @@ JesseDuffield.lazydocker
 junegunn.fzf
 Microsoft.PowerShell
 MongoDB.Compass.Full
+Mozilla.Firefox.DeveloperEdition
 Mozilla.Thunderbird
 Neovim.Neovim
 Notion.Notion
