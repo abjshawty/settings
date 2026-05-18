@@ -968,6 +968,18 @@ function Open-Origin {
     }
 }
 
+function Open-DefaultBrowser {
+    param(
+        [string]$Url
+    )
+    $browser = Get-DefaultBrowserPath
+    if ($Url) {
+        & $browser $Url
+    } else {
+        & $browser
+    }
+}
+
 function Push-Git {
     <#
     .SYNOPSIS
@@ -1715,8 +1727,8 @@ function Test-ProfileFunctions {
 # ALIASES (Alphabetical Order)
 # ============================================================================
 
-# Set-Alias b Get-DefaultBrowserPath
 Set-Alias b Get-DefaultBrowserPath
+Set-Alias bd Open-DefaultBrowser
 # Set-Alias bi "bun install"
 Set-Alias cd z
 Set-Alias clone Get-GitSSH
