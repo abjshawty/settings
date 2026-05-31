@@ -22,6 +22,8 @@ if (Test-Path alias:rmdir) { Remove-Item alias:rmdir }
 if (Test-Path alias:ls) { Remove-Item alias:ls }
 if (Test-Path alias:cd) { Remove-Item alias:cd }
 if (Test-Path alias:curl) {Remove-Item alias:curl}
+# `search` is now a function (the Rust CLI); drop any stale alias so it wins on re-source
+if (Test-Path alias:search) { Remove-Item alias:search }
 # ============================================================================
 # FUNCTIONS (Alphabetical Order)
 # ============================================================================
@@ -680,13 +682,33 @@ function n {
     }
 }
 
-function win { 
+function win {
     if ($args.Count -eq 0) {
         winget update --all
     } else {
         winget install $args
     }
 }
+
+function search {
+    <#
+    .SYNOPSIS
+        Builds a search-engine URL from a query and opens it in the default browser.
+    .DESCRIPTION
+        Thin wrapper over the `search` Rust CLI (D:\personal\search). A naked
+        query uses the modifiable default engine (Google initially); engines are
+        selectable per-call via flags, and `--set-default <engine>` persists a
+        new default. The binary opens the URL via the `b` alias.
+    .EXAMPLE
+        search what is a monkey?      # default engine
+    .EXAMPLE
+        search -g rust lifetimes      # force Google for this call
+    .EXAMPLE
+        search --set-default google   # change the default engine
+    #>
+    & 'D:/personal/search/target/release/search.exe' @args
+}
+
 function New-File {
     <#
     .SYNOPSIS
