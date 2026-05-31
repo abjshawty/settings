@@ -1727,8 +1727,8 @@ function Test-ProfileFunctions {
 # ALIASES (Alphabetical Order)
 # ============================================================================
 
-Set-Alias b Get-DefaultBrowserPath
-Set-Alias bd Open-DefaultBrowser
+Set-Alias b Open-DefaultBrowser
+Set-Alias bd Get-DefaultBrowserPath
 # Set-Alias bi "bun install"
 Set-Alias cd z
 Set-Alias clone Get-GitSSH
@@ -1737,6 +1737,7 @@ Set-Alias cc claude
 Set-Alias dev Set-LocationDev
 Set-Alias disconnect Disconnect-Wifi
 Set-Alias e explorer.exe
+Set-Alias hist Search-History
 Set-Alias lzc lazycurl
 Set-Alias lzd lazydocker
 Set-Alias lzg lazygit
@@ -1753,7 +1754,6 @@ Set-Alias pum Update-PythonModules
 Set-Alias push Push-Git
 Set-Alias rl railway
 set-alias rmdir remove-folder
-Set-Alias search Search-History
 Set-Alias ssh_url Find-HTTPSUrl
 Set-Alias storage Get-Storage
 Set-Alias swap Edit-Policy
