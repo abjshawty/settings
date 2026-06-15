@@ -706,7 +706,8 @@ function search {
     .EXAMPLE
         search --set-default google   # change the default engine
     #>
-    & 'D:/personal/search/target/release/search.exe' @args
+    $base_path = $workspace.TrimEnd('\').TrimEnd('/');
+    & "$base_path/settings/rust/search/target/release/search.exe" @args
 }
 
 function New-File {
