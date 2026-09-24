@@ -1787,3 +1787,7 @@ Set-Alias update Update-NodeApp
 Set-Alias v nvim.exe
 Set-Alias vim nvim.exe
 Set-Alias w winget
+
+function ssh-list {
+    Select-String -Pattern "^Host\s+(\S+)" ~\.ssh\config | ForEach-Object { $_.Matches[0].Groups[1].Value };
+  }
