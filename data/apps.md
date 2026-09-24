@@ -4,6 +4,7 @@ BrechtSanders.WinLibs.POSIX.UCRT
 Bruno.Bruno
 BurntSushi.ripgrep.MSVC
 charmbracelet.glow
+cjpais.Handy
 Cockos.REAPER
 Codeium.Windsurf
 CoreyButler.NVMforWindows
