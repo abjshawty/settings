@@ -33,24 +33,22 @@ function Install-AppsFromList {
             return
         }
         
-        # Read all lines from the apps file
-        $appLines = Get-Content $appsFilePath
-        
-        # Filter out empty lines and comments
-        $appsToInstall = $appLines | Where-Object { 
-            $_.Trim() -ne "" -and -not $_.Trim().StartsWith("#") 
-        }
-        
+        # Keep only the "winget install --id <ID> ..." lines from the code blocks
+        $appsToInstall = @(Get-Content $appsFilePath | Where-Object {
+            $_ -match '^\s*winget install --id \S+'
+        })
+
         Write-Host "Found $($appsToInstall.Count) applications to install" -ForegroundColor Yellow
-        
-        # Install each app
-        foreach ($appId in $appsToInstall) {
-            $appId = $appId.Trim()
+
+        # Install each app (lines may carry extra args such as --override)
+        foreach ($line in $appsToInstall) {
+            $line = $line.Trim()
+            $appId = ($line -split '\s+')[3]
             Write-Host "Installing: $appId" -ForegroundColor Cyan
-            
+
             try {
-                winget install --id="$appId" --exact --accept-source-agreements --accept-package-agreements
-                
+                Invoke-Expression "$line --accept-source-agreements --accept-package-agreements"
+
                 if ($LASTEXITCODE -eq 0) {
                     Write-Host "✓ Successfully installed: $appId" -ForegroundColor Green
                 }

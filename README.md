@@ -8,11 +8,8 @@ Do not clone this to a shared workstation, as it contains much private data.
 
 ```
 settings/
-├── data/           # Package lists for various tools
-│   ├── apps.md    # winget applications (37 installed)
-│   ├── cargo.md   # Rust/Cargo tools
-│   ├── go.md      # Go binaries
-│   └── ext.md     # System extensions (LLVM, VS Build Tools)
+├── data/
+│   └── apps.md    # All apps by category: winget, cargo, go, manual downloads
 ├── lua/           # Terminal and editor configs
 │   ├── colorscheme.lua  # Neovim colorschemes (LazyVim)
 │   └── .wezterm.lua     # WezTerm terminal config
