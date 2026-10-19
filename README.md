@@ -21,7 +21,7 @@ settings/
 ## Installed Apps
 
 - **Editors**: Neovim, Claude Code, Codeium Windsurf
-- **Languages**: Go, Rust, Python 3.13, Node.js (via NVM)
+- **Languages**: Go, Rust, Python 3.14, Node.js (via NVM)
 - **Dev Tools**: lazygit, lazydocker, lazysql, lazycurl, fzf, bat, eza, glow, tealdeer
 - **Terminal**: WezTerm, oh-my-posh, zoxide, eza
 - **Databases**: DBeaver, MongoDB Compass

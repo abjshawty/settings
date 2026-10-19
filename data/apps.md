@@ -14,8 +14,9 @@ Install order matters: **Languages & Toolchains** first (Rust and Go are needed 
 | --- | --- | --- |
 | Go | `Golang.Go` | Go compiler and toolchain (needed for the Go tools below) |
 | Rustup | `Rustlang.Rustup` | Rust toolchain installer: `rustc`, `cargo` (needed for the Cargo tools below) |
-| Python 3.13 | `Python.Python.3.13` | Python interpreter and `pip` |
+| Python 3.14 | `Python.Python.3.14` | Python interpreter and `pip` |
 | NVM for Windows | `CoreyButler.NVMforWindows` | Node.js version manager |
+| Azul Zulu JDK 21 | `Azul.Zulu.21.JDK` | OpenJDK 21 build (needed by the Android command-line tools) |
 | WinLibs (GCC) | `BrechtSanders.WinLibs.POSIX.UCRT` | GCC / MinGW-w64 toolchain (POSIX threads, UCRT) |
 | LLVM | `LLVM.LLVM` | Clang, LLD and the rest of the LLVM toolchain |
 | VS 2022 Build Tools | `Microsoft.VisualStudio.2022.BuildTools` | MSVC compiler and Windows SDK (C++ workload), required by Rust's MSVC target |
@@ -23,8 +24,9 @@ Install order matters: **Languages & Toolchains** first (Rust and Go are needed 
 ```powershell
 winget install --id Golang.Go -e
 winget install --id Rustlang.Rustup -e
-winget install --id Python.Python.3.13 -e
+winget install --id Python.Python.3.14 -e
 winget install --id CoreyButler.NVMforWindows -e
+winget install --id Azul.Zulu.21.JDK -e
 winget install --id BrechtSanders.WinLibs.POSIX.UCRT -e
 winget install --id LLVM.LLVM -e
 winget install --id Microsoft.VisualStudio.2022.BuildTools -e --override "--passive --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
@@ -35,12 +37,14 @@ winget install --id Microsoft.VisualStudio.2022.BuildTools -e --override "--pass
 | App | ID | Description |
 | --- | --- | --- |
 | Claude Code | `Anthropic.ClaudeCode` | Anthropic's agentic coding CLI |
+| Claude | `Anthropic.Claude` | Claude desktop app |
 | opencode | `SST.opencode` | Open-source AI coding agent for the terminal |
 | LM Studio | `ElementLabs.LMStudio` | Download and run local LLMs |
 | Handy | `cjpais.Handy` | Offline push-to-talk speech-to-text |
 
 ```powershell
 winget install --id Anthropic.ClaudeCode -e
+winget install --id Anthropic.Claude -e
 winget install --id SST.opencode -e
 winget install --id ElementLabs.LMStudio -e
 winget install --id cjpais.Handy -e
@@ -52,10 +56,12 @@ winget install --id cjpais.Handy -e
 | --- | --- | --- |
 | Neovim | `Neovim.Neovim` | Modal text editor (LazyVim config) |
 | Windsurf | `Codeium.Windsurf` | AI-first editor based on VS Code |
+| Zed | `ZedIndustries.Zed` | Fast native editor written in Rust |
 
 ```powershell
 winget install --id Neovim.Neovim -e
 winget install --id Codeium.Windsurf -e
+winget install --id ZedIndustries.Zed -e
 ```
 
 ## Terminals & Shell
@@ -63,6 +69,8 @@ winget install --id Codeium.Windsurf -e
 | App | ID | Description |
 | --- | --- | --- |
 | PowerShell | `Microsoft.PowerShell` | PowerShell 7+, the main shell |
+| Windows Terminal | `Microsoft.WindowsTerminal` | Microsoft's tabbed terminal |
+| WSL | `Microsoft.WSL` | Windows Subsystem for Linux |
 | WezTerm | `wez.wezterm` | GPU-accelerated terminal, configured in Lua |
 | Warp | `Warp.Warp` | Modern terminal with built-in AI and blocks |
 | Oh My Posh | `JanDeDobbeleer.OhMyPosh` | Prompt theme engine |
@@ -70,6 +78,8 @@ winget install --id Codeium.Windsurf -e
 
 ```powershell
 winget install --id Microsoft.PowerShell -e
+winget install --id Microsoft.WindowsTerminal -e
+winget install --id Microsoft.WSL -e
 winget install --id wez.wezterm -e
 winget install --id Warp.Warp -e
 winget install --id JanDeDobbeleer.OhMyPosh -e
@@ -84,24 +94,32 @@ winget install --id Termius.Termius -e
 | eza | `eza-community.eza` | Modern `ls` with icons and Git status |
 | fzf | `junegunn.fzf` | Fuzzy finder for files, history, anything |
 | ripgrep | `BurntSushi.ripgrep.MSVC` | Very fast recursive search (`rg`) |
+| fd | `sharkdp.fd` | Fast, friendly alternative to `find` |
+| jq | `jqlang.jq` | Query and transform JSON |
 | zoxide | `ajeetdsouza.zoxide` | Smarter `cd` that learns your folders |
 | tealdeer | `dbrgn.tealdeer` | Fast `tldr` client: short command examples |
 | Glow | `charmbracelet.glow` | Render Markdown in the terminal |
 | Fastfetch | `Fastfetch-cli.Fastfetch` | System info display |
 | btop4win | `aristocratos.btop4win` | Resource monitor (CPU, memory, disks, network) |
 | cURL | `cURL.cURL` | HTTP and transfer tool |
+| 7-Zip | `7zip.7zip` | Archive manager (zip, 7z, tar, rar…) |
+| cloudflared | `Cloudflare.cloudflared` | Cloudflare Tunnel client: expose local servers |
 
 ```powershell
 winget install --id sharkdp.bat -e
 winget install --id eza-community.eza -e
 winget install --id junegunn.fzf -e
 winget install --id BurntSushi.ripgrep.MSVC -e
+winget install --id sharkdp.fd -e
+winget install --id jqlang.jq -e
 winget install --id ajeetdsouza.zoxide -e
 winget install --id dbrgn.tealdeer -e
 winget install --id charmbracelet.glow -e
 winget install --id Fastfetch-cli.Fastfetch -e
 winget install --id aristocratos.btop4win -e
 winget install --id cURL.cURL -e
+winget install --id 7zip.7zip -e
+winget install --id Cloudflare.cloudflared -e
 ```
 
 ## Git & Containers
@@ -126,11 +144,13 @@ winget install --id JesseDuffield.lazydocker -e
 
 | App | ID | Description |
 | --- | --- | --- |
+| PostgreSQL 18 | `PostgreSQL.PostgreSQL.18` | PostgreSQL server, `psql` and pgAdmin |
 | DBeaver Community | `DBeaver.DBeaver.Community` | Universal SQL database client |
 | MongoDB Compass | `MongoDB.Compass.Full` | GUI for MongoDB |
 | Bruno | `Bruno.Bruno` | Offline, Git-friendly API client |
 
 ```powershell
+winget install --id PostgreSQL.PostgreSQL.18 -e
 winget install --id DBeaver.DBeaver.Community -e
 winget install --id MongoDB.Compass.Full -e
 winget install --id Bruno.Bruno -e
@@ -153,11 +173,15 @@ winget install --id Zen-Team.Zen-Browser -e
 | App | ID | Description |
 | --- | --- | --- |
 | Notion | `Notion.Notion` | Notes, docs and wikis |
+| Obsidian | `Obsidian.Obsidian` | Local Markdown notes and knowledge base |
+| LocalSend | `LocalSend.LocalSend` | AirDrop-style file sharing over the local network |
 | Thunderbird | `Mozilla.Thunderbird` | Email client |
 | Discord | `Discord.Discord` | Voice and text chat |
 
 ```powershell
 winget install --id Notion.Notion -e
+winget install --id Obsidian.Obsidian -e
+winget install --id LocalSend.LocalSend -e
 winget install --id Mozilla.Thunderbird -e
 winget install --id Discord.Discord -e
 ```
