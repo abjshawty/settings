@@ -24,7 +24,7 @@ settings/
 - **Languages**: Go, Rust, Python 3.14, Node.js (via NVM)
 - **Dev Tools**: lazygit, lazydocker, lazysql, lazycurl, fzf, bat, eza, glow, tealdeer
 - **Terminal**: WezTerm, oh-my-posh, zoxide, eza
-- **Databases**: DBeaver, MongoDB Compass
+- **Databases**: DBX
 - **Misc**: Docker Desktop, Spotify, Discord, Thunderbird, REAPER, Zen Browser
 
 ## Using it

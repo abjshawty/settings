@@ -145,14 +145,12 @@ winget install --id JesseDuffield.lazydocker -e
 | App | ID | Description |
 | --- | --- | --- |
 | PostgreSQL 18 | `PostgreSQL.PostgreSQL.18` | PostgreSQL server, `psql` and pgAdmin |
-| DBeaver Community | `DBeaver.DBeaver.Community` | Universal SQL database client |
-| MongoDB Compass | `MongoDB.Compass.Full` | GUI for MongoDB |
+| DBX | `t8y2.DBX` | Lightweight cross-platform database client |
 | Bruno | `Bruno.Bruno` | Offline, Git-friendly API client |
 
 ```powershell
 winget install --id PostgreSQL.PostgreSQL.18 -e
-winget install --id DBeaver.DBeaver.Community -e
-winget install --id MongoDB.Compass.Full -e
+winget install --id t8y2.DBX -e
 winget install --id Bruno.Bruno -e
 ```
 
