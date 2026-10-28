@@ -1,0 +1,69 @@
+#!/bin/bash
+# Syncs the current Omarchy theme's colors.toml into a Spicetify theme (~/.config/spicetify/Themes/Omarchy).
+# Installed as a theme-set.d hook, so it runs automatically on every `omarchy theme set`.
+# Restarts Spotify only if it is already running.
+set -euo pipefail
+
+command -v spicetify >/dev/null || exit 0
+
+COLORS="$HOME/.local/state/omarchy/current/theme/colors.toml"
+THEME_DIR="$HOME/.config/spicetify/Themes/Omarchy"
+
+[[ -f $COLORS ]] || exit 0
+
+get() {
+  sed -n "s/^$1 = \"#\?\(.*\)\"/\1/p" "$COLORS" | head -1
+}
+
+bg=$(get background)
+dark_bg=$(get dark_background)
+darker_bg=$(get darker_background)
+fg=$(get foreground)
+accent=$(get accent)
+selection=$(get selection)
+muted=$(get muted)
+red=$(get red)
+bright_red=$(get bright_red)
+subtext=$(get bright_foreground)
+[[ -n $subtext ]] || subtext=$muted
+[[ -n $dark_bg ]] || dark_bg=$bg
+[[ -n $darker_bg ]] || darker_bg=$dark_bg
+
+mkdir -p "$THEME_DIR"
+
+# Generated on every theme change; do not hand-edit
+cat > "$THEME_DIR/color.ini" <<INI
+[omarchy]
+text               = $fg
+subtext            = $subtext
+main               = $bg
+main-elevated      = $selection
+highlight          = $selection
+highlight-elevated = $selection
+sidebar            = $dark_bg
+player             = $darker_bg
+card               = $selection
+shadow             = $darker_bg
+selected-row       = $fg
+button             = $accent
+button-active      = $accent
+button-disabled    = $muted
+tab-active         = $selection
+notification       = $accent
+notification-error = ${bright_red:-$red}
+misc               = $muted
+INI
+
+[[ -f $THEME_DIR/user.css ]] || touch "$THEME_DIR/user.css"
+
+# Point spicetify at this theme (first run switches away from any other theme)
+spicetify config current_theme Omarchy color_scheme omarchy >/dev/null
+
+# Run in the background so `omarchy theme set` is not held up
+(
+  spicetify refresh -n >/dev/null 2>&1 || exit 0
+  if pgrep -x spotify >/dev/null; then
+    spicetify restart >/dev/null 2>&1
+  fi
+) </dev/null &>/dev/null &
+disown

@@ -13,6 +13,9 @@ settings/
 ├── lua/           # Terminal and editor configs
 │   ├── colorscheme.lua  # Neovim colorschemes (LazyVim)
 │   └── .wezterm.lua     # WezTerm terminal config
+├── omarchy/       # Omarchy hooks
+│   ├── hooks/theme-set.d/  # Make Yaak and Spotify follow the Omarchy theme
+│   └── install-hooks.sh    # Install every hook and apply the current theme
 └── powershell/    # PowerShell profile and scripts
     ├── init.ps1   # App installer from data/apps.md
     └── profile.ps1 # Main profile (~30 functions, 30+ aliases)
@@ -46,6 +49,16 @@ Or simply run the init script:
 ```
 . $HOME\dev\settings\powershell\init.ps1
 ```
+
+## Omarchy hooks
+
+`omarchy/hooks/<event>.d/` mirrors `~/.config/omarchy/hooks/`. To install them all on a machine and apply the current theme right away:
+
+```sh
+./omarchy/install-hooks.sh
+```
+
+The `theme-set` hooks need some one-time setup in each app (adding the Yaak plugin, patching Spotify with Spicetify). That's documented in the vault's *Omarchy theme sync* note.
 
 ## Available Functions
 
