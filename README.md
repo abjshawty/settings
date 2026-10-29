@@ -17,8 +17,6 @@ settings/
 ├── powershell/
 │   ├── init.ps1         # Installs every app in data/apps.md, then loads the profile
 │   └── profile.ps1      # Main profile: functions and aliases
-└── rust/
-    └── search/          # `search` CLI: open a search-engine query in the browser
 ```
 
 ## Installed Apps
@@ -45,10 +43,9 @@ To install all apps from `data/apps.md` and load the profile, run the init scrip
 . $HOME\dev\settings\powershell\init.ps1
 ```
 
-To build the `search` tool used by the profile's `search` function:
+To install the [`search`](https://github.com/abjshawty/search) CLI (needs Rust):
 ```
-cd $HOME\dev\settings\rust\search
-cargo build --release
+cargo install --git ssh://git@github.com/abjshawty/search
 ```
 
 ## Available Functions
@@ -62,7 +59,6 @@ Key functions in profile.ps1:
 - `New-File` / `Remove-Folder` - Create (or touch) files, delete folders with a confirmation
 - `Set-LocationDev` - Navigate to dev workspace
 - `Find-WifiKey` - Retrieve saved WiFi passwords
-- `search` - Search the web from the terminal (`search --help`)
 
 Key aliases:
 - `n` - nvim (opens the current folder with no arguments)

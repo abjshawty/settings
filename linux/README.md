@@ -36,8 +36,8 @@ The `theme-set` hooks need some one-time setup in each app (adding the Yaak plug
 
 ## search
 
-The `search` CLI lives in the main settings repo under `rust/search`. Install it onto PATH with:
+Install the [`search`](https://github.com/abjshawty/search) CLI onto PATH with:
 
 ```sh
-cargo install --path rust/search
+cargo install --git ssh://git@github.com/abjshawty/search
 ```
