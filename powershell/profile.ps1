@@ -10,7 +10,6 @@ if (-not $workspace) {
 # INITIALIZATION
 # ============================================================================
 
-# try { oh-my-posh init pwsh --config "material" | Invoke-Expression } catch { }
 oh-my-posh init pwsh --config "material" | Invoke-Expression 2>$null
 zoxide.exe init powershell | Out-String | Invoke-Expression 2>$null
 
@@ -22,281 +21,34 @@ if (Test-Path alias:rmdir) { Remove-Item alias:rmdir }
 if (Test-Path alias:ls) { Remove-Item alias:ls }
 if (Test-Path alias:cd) { Remove-Item alias:cd }
 if (Test-Path alias:curl) {Remove-Item alias:curl}
-# `search` is now a function (the Rust CLI); drop any stale alias so it wins on re-source
-if (Test-Path alias:search) { Remove-Item alias:search }
 # ============================================================================
 # FUNCTIONS (Alphabetical Order)
 # ============================================================================
 
-function Update-PythonModules {
-    <#
-    .SYNOPSIS
-        Updates all installed Python packages to their latest versions.
-    .DESCRIPTION
-        Gets a list of all installed Python packages and upgrades each one.
-        Uses pip to list packages and then upgrades them individually.
-    .EXAMPLE
-        Update-PythonModules
-        Updates all installed Python packages
-    #>
-    param()
-    py -m pip list --format=json | ConvertFrom-Json | ForEach-Object {
-        py -m pip install --upgrade $_.name
-    }
-    # $temp = py -m pip list
-    # $res = $temp.replace('0', '')
-    # for ($x = 0; $x -lt 10; $x++) {
-    #     $res = $res.replace($x.ToString(), '')
-    # }
-    # $res = $res.replace('.', '')
-    # $res = $res.replace('Package                   Version', '')
-    # $res = $res.replace('------------------------- ---------', '')
-    # foreach ($x in $res) {
-    #     py -m pip install --upgrade $x
-    # }
-}
-
 function Connect-Wifi {
     <#
     .SYNOPSIS
-        Connects to a specified WiFi network.
-    .DESCRIPTION
-        Uses netsh.exe to connect to a WiFi network by name.
-        Provides feedback on connection status.
+        Connects to a saved WiFi network.
     .PARAMETER Name
-        The name of the WiFi network to connect to.
-    .PARAMETER Timeout
-        Connection timeout in seconds (default: 30).
-    .PARAMETER Retry
-        Number of retry attempts (default: 3).
+        The name of the saved WiFi profile to connect to.
     .EXAMPLE
         Connect-Wifi "MyNetwork"
         Connects to the WiFi network named "MyNetwork"
-    .EXAMPLE
-        Connect-Wifi "MyNetwork" -Timeout 60 -Retry 5
-        Connects with extended timeout and retry attempts
     #>
-    [CmdletBinding()]
     param (
         [Parameter(Mandatory, Position = 0)]
-        [ValidateNotNullOrEmpty()]
-        [ValidateLength(1, 32)]
-        [ValidatePattern('^[^<>:"|?*]+$')]
         [string]
-        $Name,
-        
-        [Parameter()]
-        [ValidateRange(5, 300)]
-        [int]
-        $Timeout = 30,
-        
-        [Parameter()]
-        [ValidateRange(1, 10)]
-        [int]
-        $Retry = 3
+        $Name
     )
-    
-    try {
-        Write-Verbose "Attempting to connect to WiFi network: $Name"
-        
-        # Check if netsh is available
-        if (-not (Get-Command netsh.exe -ErrorAction SilentlyContinue)) {
-            Write-Error "netsh.exe not found. This function requires Windows."
-            return
-        }
-        
-        # Get available WiFi networks
-        Write-Verbose "Checking available WiFi networks..."
-        $availableNetworks = netsh wlan show profiles 2>&1 | Select-String "All User Profile"
-        
-        if ($LASTEXITCODE -ne 0) {
-            Write-Error "Failed to retrieve WiFi profiles. Make sure WiFi adapter is enabled."
-            return
-        }
-        
-        # Extract network names
-        $networkNames = $availableNetworks | ForEach-Object {
-            if ($_ -match ':\s*(.+)$') {
-                $matches[1].Trim()
-            }
-        }
-        
-        Write-Verbose "Found $($networkNames.Count) saved networks: $($networkNames -join ', ')"
-        
-        # Check if requested network exists
-        if ($networkNames -notcontains $Name) {
-            Write-Error "WiFi network '$Name' not found in saved profiles"
-            Write-Warning "Available networks: $($networkNames -join ', ')"
-            
-            # Suggest similar networks if available
-            $similar = $networkNames | Where-Object { $_ -like "*$Name*" -or $Name -like "*$_*" }
-            if ($similar) {
-                Write-Warning "Did you mean: $($similar -join ', ')"
-            }
-            return
-        }
-        
-        # Check current connection status
-        $currentConnection = netsh wlan show interfaces 2>&1 | Select-String "SSID" | Select-String -NotMatch "BSSID"
-        if ($currentConnection -and $currentConnection -match $Name) {
-            Write-Output "Already connected to network: $Name"
-            return
-        }
-        
-        # Attempt connection with retries
-        $attempt = 0
-        while ($attempt -lt $Retry) {
-            $attempt++
-            Write-Verbose "Connection attempt $attempt of $Retry"
-            
-            # Attempt connection
-            $result = netsh.exe wlan connect $Name 2>&1
-            
-            if ($LASTEXITCODE -eq 0) {
-                Write-Verbose "Connection command sent successfully"
-                
-                # Wait for connection to establish
-                Write-Verbose "Waiting for connection to establish..."
-                $connected = $false
-                $waitTime = 0
-                
-                while ($waitTime -lt $Timeout -and -not $connected) {
-                    Start-Sleep 2
-                    $waitTime += 2
-                    
-                    # Check connection status
-                    $status = netsh wlan show interfaces 2>&1 | Select-String "State"
-                    if ($status -match "connected") {
-                        $ssid = netsh wlan show interfaces 2>&1 | Select-String "SSID" | Select-String -NotMatch "BSSID"
-                        if ($ssid -match $Name) {
-                            $connected = $true
-                            Write-Output "Successfully connected to network: $Name"
-                            Write-Verbose "Connection established after $waitTime seconds"
-                            return
-                        }
-                    }
-                }
-                
-                if (-not $connected) {
-                    Write-Warning "Connection timeout after $waitTime seconds (attempt $attempt)"
-                }
-            }
-            else {
-                Write-Warning "Connection command failed (attempt $attempt): $result"
-            }
-            
-            if ($attempt -lt $Retry) {
-                Write-Verbose "Waiting before retry..."
-                Start-Sleep 5
-            }
-        }
-        
-        Write-Error "Failed to connect to '$Name' after $Retry attempts"
-        Write-Warning "Troubleshooting tips:"
-        Write-Warning "  - Check if WiFi adapter is enabled"
-        Write-Warning "  - Verify network name spelling"
-        Write-Warning "  - Ensure network is in range"
-        Write-Warning "  - Check if network requires additional authentication"
-    }
-    catch {
-        Write-Error "Unexpected error connecting to WiFi: $($_.Exception.Message)"
-        Write-Warning "Make sure you're running with appropriate permissions"
-    }
+    netsh.exe wlan connect $Name
 }
 
 function Disconnect-Wifi {
     <#
     .SYNOPSIS
         Disconnects from the current WiFi network.
-    .DESCRIPTION
-        Uses netsh.exe to disconnect from the currently connected WiFi network.
-    .EXAMPLE
-        Disconnect-Wifi
-        Disconnects from the current WiFi connection
     #>
-    param ()
-    
-    try {
-        Write-Verbose "Attempting to disconnect from current WiFi network"
-        
-        # Check if currently connected to any network
-        $currentConnection = netsh wlan show interfaces | Select-String "SSID" | Select-String -NotMatch "BSSID"
-        
-        if (-not $currentConnection) {
-            Write-Warning "No WiFi connection currently active"
-            return
-        }
-        
-        # Attempt disconnection
-        $result = netsh.exe wlan disconnect 2>&1
-        
-        if ($LASTEXITCODE -eq 0) {
-            Write-Output "Successfully disconnected from WiFi network"
-        }
-        else {
-            Write-Error "Failed to disconnect from WiFi. Exit code: $LASTEXITCODE"
-            Write-Warning "Output: $result"
-        }
-    }
-    catch {
-        Write-Error "Unexpected error disconnecting from WiFi: $($_.Exception.Message)"
-    }
-}
-
-function Edit-Policy {
-    <#
-    .SYNOPSIS
-        Toggles PowerShell execution policy between Restricted and Unrestricted.
-    .DESCRIPTION
-        Switches PowerShell execution policy between Restricted and Unrestricted states.
-        Can operate at user scope or system scope (requires admin privileges).
-    .PARAMETER u
-        If specified, changes policy for CurrentUser scope only.
-        If not specified, attempts to change system-wide policy (requires admin).
-    .EXAMPLE
-        Edit-Policy
-        Toggles system-wide execution policy (requires admin)
-    .EXAMPLE
-        Edit-Policy -u "true"
-        Toggles CurrentUser execution policy
-    #>
-    param (
-        [Parameter()]
-        [string]
-        $u = $null
-    )
-    $a = Get-ExecutionPolicy
-    if ($null -eq $u) {
-        try {
-            if ($a -eq "Restricted") {
-                Set-ExecutionPolicy Unrestricted
-                Write-Output 'Execution Policy Set To Unrestricted'
-            }
-            else {
-                Set-ExecutionPolicy Restricted
-                Write-Output 'Execution Policy Set To Restricted'
-                Write-Output "u=$u"
-            }
-        }
-        catch {
-            Write-Output 'Please run terminal as admin or use option /x'
-        }
-    }
-    else {
-        try {
-            if ($a -eq "Restricted") {
-                Set-ExecutionPolicy Unrestricted -Scope CurrentUser
-                Write-Output 'Execution Policy Set To Unrestricted'
-            }
-            else {
-                Set-ExecutionPolicy Restricted -Scope CurrentUser
-                Write-Output 'Execution Policy Set To Restricted'
-            }
-        }
-        catch {
-            Write-Output 'Please run terminal as admin or use option -u'
-        }
-    }
+    netsh.exe wlan disconnect
 }
 
 function unzip {
@@ -353,8 +105,9 @@ function Find-HTTPSUrl {
     .SYNOPSIS
         Converts Git SSH URLs to HTTPS URLs.
     .DESCRIPTION
-        Transforms Git SSH URLs (git@github.com:user/repo.git) to HTTPS URLs.
-        Useful for opening repositories in browsers or for HTTPS operations.
+        Transforms Git SSH URLs (git@github.com:user/repo.git or
+        ssh://git@github.com/user/repo.git) to HTTPS URLs. HTTPS URLs are
+        returned unchanged.
     .PARAMETER url
         The Git URL to convert (SSH or HTTPS format).
     .EXAMPLE
@@ -366,9 +119,7 @@ function Find-HTTPSUrl {
         [string]
         $url
     )
-    $url = $url -replace ':', '/'
-    $url = $url -replace 'git@', 'https://'
-    $url
+    $url -replace '^(?:ssh://)?git@([^:/]+)[:/]', 'https://$1/'
 }
 
 function Find-Port {
@@ -406,11 +157,11 @@ function Find-WifiKey {
         Shows the password for WiFi network "MyNetwork"
     #>
     param (
-        [Parameter()]
+        [Parameter(Mandatory)]
         [string]
         $name
     )
-    Invoke-Expression "netsh wlan show profile $($name) key=clear | findstr Key"
+    netsh.exe wlan show profile $name key=clear | Select-String "Key"
 }
 
 function Get-DefaultBrowserName {
@@ -642,15 +393,14 @@ function Get-Ip {
     .SYNOPSIS
         Gets the local IP address.
     .DESCRIPTION
-        Uses ipconfig to find IPv4 addresses and filters for addresses starting with .1.
-        Typically returns the local network IP address.
+        Returns the IPv4 address of every connected adapter that has a default
+        gateway, i.e. the address other machines on the network can reach.
     .EXAMPLE
         Get-Ip
         Returns "192.168.1.100" (example local IP)
     #>
     param()
-    $out = (ipconfig.exe | findstr.exe 'IPv4')
-    Write-Output ($out | findstr.exe '\.1\.')
+    (Get-NetIPConfiguration | Where-Object { $_.IPv4DefaultGateway -and $_.NetAdapter.Status -eq 'Up' }).IPv4Address.IPAddress
 }
 
 function Get-Storage {
@@ -664,14 +414,6 @@ function Get-Storage {
     #>
     param ()
     Get-PSDrive C
-}
-
-function c {
-    if ($args.Count -eq 0) {
-        windsurf .
-    } else {
-        windsurf $args
-    }
 }
 
 function n { 
@@ -690,150 +432,51 @@ function win {
     }
 }
 
-function search {
-    <#
-    .SYNOPSIS
-        Builds a search-engine URL from a query and opens it in the default browser.
-    .DESCRIPTION
-        Thin wrapper over the `search` Rust CLI (D:\personal\search). A naked
-        query uses the modifiable default engine (Google initially); engines are
-        selectable per-call via flags, and `--set-default <engine>` persists a
-        new default. The binary opens the URL via the `b` alias.
-    .EXAMPLE
-        search what is a monkey?      # default engine
-    .EXAMPLE
-        search -g rust lifetimes      # force Google for this call
-    .EXAMPLE
-        search --set-default google   # change the default engine
-    #>
-    $base_path = $workspace.TrimEnd('\').TrimEnd('/');
-    & "$base_path/settings/rust/search/target/release/search.exe" @args
-}
-
 function New-File {
     <#
     .SYNOPSIS
-        Creates a new file with the specified name.
-    .DESCRIPTION
-        Creates a new empty file if it doesn't already exist.
-        Provides feedback if no name is provided or if file already exists.
-    .PARAMETER name
+        Creates a file, or updates its timestamp if it already exists (like Unix touch).
+    .PARAMETER Name
         The name of the file to create.
     .PARAMETER Path
         The directory where to create the file (default: current directory).
     .PARAMETER Extension
-        The file extension to use (optional).
-    .PARAMETER Force
-        Overwrite existing file without confirmation.
+        The file extension to append, e.g. ".txt" (optional).
     .EXAMPLE
         New-File "test.txt"
         Creates a new file named test.txt
     .EXAMPLE
-        New-File "document" -Extension "pdf" -Path "C:\Docs"
-        Creates document.pdf in C:\Docs directory
+        New-File "document" -Extension ".md" -Path "C:\Docs"
+        Creates document.md in C:\Docs directory
     #>
-    [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position = 0)]
-        [ValidateNotNullOrEmpty()]
         [ValidatePattern('^[^<>:"|?*\\/]+$')]
         [string]
         $Name,
-        
-        [Parameter()]
-        [ValidateScript({
-                if (-not (Test-Path $_ -PathType Container)) {
-                    throw "Directory '$_' does not exist"
-                }
-                if (-not (Test-Path $_ -PathType Container)) {
-                    throw "Path '$_' is not a directory"
-                }
-                $true
-            })]
+
+        [Parameter(Position = 1)]
         [string]
         $Path = ".",
-        
-        [Parameter()]
-        [ValidatePattern('^\\.[a-zA-Z0-9]+$')]
+
+        [Parameter(Position = 2)]
+        [ValidatePattern('^\.[a-zA-Z0-9]+$')]
         [string]
-        $Extension = "",
-        
-        [Parameter()]
-        [switch]
-        $Force
+        $Extension = ""
     )
-    
-    try {
-        Write-Verbose "Attempting to create file: $Name"
-        
-        # Build full file path
-        if ($Extension) {
-            if ($Name -match '\\.[^.]+$') {
-                # Name already has extension, replace it
-                $fileName = [System.IO.Path]::GetFileNameWithoutExtension($Name) + $Extension
-            }
-            else {
-                # Add extension
-                $fileName = $Name + $Extension
-            }
-        }
-        else {
-            $fileName = $Name
-        }
-        
-        $fullPath = Join-Path $Path $fileName
-        Write-Verbose "Full path: $fullPath"
-        
-        # Check for invalid characters in full path
-        $invalidChars = [IO.Path]::GetInvalidPathChars()
-        if ($fullPath.IndexOfAny($invalidChars) -ge 0) {
-            Write-Error "Path contains invalid characters: $fullPath"
-            Write-Warning "Invalid characters: $($invalidChars -join ', ')"
-            return
-        }
-        
-        # Check path length (Windows limit)
-        if ($fullPath.Length -gt 260) {
-            Write-Error "Path too long (max 260 characters): $fullPath"
-            return
-        }
-        
-        # Check if file already exists
-        if (Test-Path $fullPath) {
-            if ($Force) {
-                Write-Verbose "Overwriting existing file: $fullPath"
-                Remove-Item $fullPath -Force -ErrorAction Stop
-            }
-            else {
-                Write-Warning "File already exists: $fullPath"
-                $choice = Read-Host "Do you want to overwrite the existing file? (y/N)"
-                if ($choice -notmatch '^[Yy]') {
-                    Write-Output "File creation cancelled"
-                    return
-                }
-                Remove-Item $fullPath -Force -ErrorAction Stop
-            }
-        }
-        
-        # Attempt to create the file
-        $newFile = New-Item -Path $fullPath -ItemType File -Force -ErrorAction Stop
-        Write-Output "Successfully created file: $($newFile.FullName)"
-        
-        # Return the file object for potential chaining
-        return $newFile
+
+    if ($Extension -and -not $Name.EndsWith($Extension)) {
+        $Name += $Extension
     }
-    catch [System.UnauthorizedAccessException] {
-        Write-Error "Access denied: Cannot create file '$fullPath'. Check permissions."
+    $fullPath = Join-Path $Path $Name
+
+    if (Test-Path -LiteralPath $fullPath) {
+        (Get-Item -LiteralPath $fullPath).LastWriteTime = Get-Date
     }
-    catch [System.IO.DirectoryNotFoundException] {
-        Write-Error "Directory not found: Cannot create file '$fullPath'. Parent directory may not exist."
+    else {
+        New-Item -Path $fullPath -ItemType File | Out-Null
+        Write-Output "Created: $fullPath"
     }
-    catch [System.IO.IOException] {
-        Write-Error "IO error: Cannot create file '$fullPath'. File may be in use or path too long."
-    }
-    catch {
-        Write-Error "Unexpected error creating file '$fullPath': $($_.Exception.Message)"
-    }   
 }
 
 function New-NodeApp {
@@ -841,31 +484,32 @@ function New-NodeApp {
     .SYNOPSIS
         Generates a new Node application.
     .DESCRIPTION
-        New-NodeApp uses npm/npx to generate apps.
+        New-NodeApp uses npx (or yarn dlx) to generate apps.
         The current options available are:
-            - Vue : vue
-            - React (With or without Vite) : react/react-no-vite
+            - Expo : expo
+            - React : react
             - Next : next
             - Svelte : svelte
             - Solid : solid
             - Qwik : qwik
             - Lit : lit
-            - React + Express : vite-express
-            - Vue + Express : vite-express
-            - Express : express
-            - Express-TS : express-ts
+            - Vue : vue
+            - Vite + Express : vite-express
+            - Server template (abjshawty/server) : server
     .PARAMETER Framework
         Specify the framework you're going to use.
         For utility purposes, the options are shown in description 
     .PARAMETER Name
         Give a name to your project.
+    .PARAMETER PackageManager
+        npm or yarn (default: yarn).
     .NOTES
         This function works on Windows and Linux running PowerShell 7+
     .LINK
         Be sure to check out more of my code experiments on https://github.com/17lxve
     .EXAMPLE
-        New NodeApp react_app
-        Creates a React Application without Vite
+        New-NodeApp react my_app
+        Creates a React + TypeScript application with Vite
     #>
     param (
         [Parameter(Mandatory)]
@@ -875,45 +519,31 @@ function New-NodeApp {
         [string]
         $Name = "",
         [Parameter()]
+        [ValidateSet("npm", "yarn")]
         [string]
         $PackageManager = "yarn"
     )
 
-    # Default options available
-    if ($PackageManager -eq "npm") {
-        $commands = @{
-            "expo"          = "npx create-expo@latest ${Name}";
-            "react"         = "npx create-vite@latest ${Name} -- --template react-ts";
-            "svelte"        = "npx create-vite@latest ${Name} -- --template svelte-ts";
-            "solid"         = "npx create-vite@latest ${Name} -- --template solid-ts";
-            "qwik"          = "npx create-vite@latest ${Name} -- --template qwik-ts";
-            "lit"           = "npx create-vite@latest ${Name} -- --template lit-ts";
-            "react-no-vite" = "npx create-react-app@latest ${Name} --use-npm";
-            "next"          = "npx create-next-app@latest ${Name} --use-npm";
-            "vue"           = "npm init vue@latest ${Name}";
-            "vite-express"  = "npx create-vite-express@latest ${Name}";
-            "server"        = "gh repo create ${Name} --template abjshawty/server --private --clone";
-            "test"          = "Write-Output 'I survived 2023 just to die at GREYDAY'"
-            "help"          = "Get-Help New-NodeApp"
-        }
+    $dlx = if ($PackageManager -eq "npm") { "npx" } else { "yarn dlx" }
+    $commands = @{
+        "expo"         = "$dlx create-expo@latest ${Name}";
+        "react"        = "$dlx create-vite@latest ${Name} --template react-ts";
+        "svelte"       = "$dlx create-vite@latest ${Name} --template svelte-ts";
+        "solid"        = "$dlx create-vite@latest ${Name} --template solid-ts";
+        "qwik"         = "$dlx create-vite@latest ${Name} --template qwik-ts";
+        "lit"          = "$dlx create-vite@latest ${Name} --template lit-ts";
+        "next"         = "$dlx create-next-app@latest ${Name} --use-${PackageManager}";
+        "vue"          = "$dlx create-vue@latest ${Name}";
+        "vite-express" = "$dlx create-vite-express@latest ${Name}";
+        "server"       = "gh repo create ${Name} --template abjshawty/server --private --clone";
+        "help"         = "Get-Help New-NodeApp"
     }
-    else {
-        $commands = @{
-            "expo"          = "yarn dlx create-expo@latest ${Name}";
-            "react"         = "yarn dlx create-vite@latest ${Name} -- --template react-ts";
-            "svelte"        = "yarn dlx create-vite@latest ${Name} -- --template svelte-ts";
-            "solid"         = "yarn dlx create-vite@latest ${Name} -- --template solid-ts";
-            "qwik"          = "yarn dlx create-vite@latest ${Name} -- --template qwik-ts";
-            "lit"           = "yarn dlx create-vite@latest ${Name} -- --template lit-ts";
-            "react-no-vite" = "yarn dlx create-react-app@latest ${Name} --use-npm";
-            "next"          = "yarn dlx create-next-app@latest ${Name} --use-npm";
-            "vue"           = "yarn init vue@latest ${Name}";
-            "vite-express"  = "yarn dlx create-vite-express@latest ${Name}";
-            "server"        = "gh repo create ${Name} --template abjshawty/server --private --clone";
-            "test"          = "Write-Output 'I survived 2025 just to die at GREYDAY'"
-            "help"          = "Get-Help New-NodeApp"
-        }
+
+    if (-not $commands.ContainsKey($Framework)) {
+        Write-Error "Unknown framework '$Framework'. Available: $($commands.Keys -join ', ')"
+        return
     }
+
     Write-Output "Starting...`n"
     # Run
     try {
@@ -1207,14 +837,15 @@ function Remove-Folder {
     .SYNOPSIS
         Removes a folder and all its contents.
     .DESCRIPTION
-        Forcefully removes a directory and all its subdirectories and files.
-        Uses -Recurse and -Force parameters for complete removal.
+        Asks for confirmation, then removes the folder recursively. Refuses
+        drive roots, your user profile folder, and anything under Windows or
+        Program Files.
     .PARAMETER Path
         The path to the folder to remove.
-    .PARAMETER Confirm
-        Skip confirmation prompt (dangerous!)
     .PARAMETER DryRun
         Show what would be deleted without actually deleting.
+    .PARAMETER Force
+        Skip the confirmation prompt.
     .EXAMPLE
         Remove-Folder "C:\temp\old-folder"
         Completely removes the old-folder directory
@@ -1224,127 +855,56 @@ function Remove-Folder {
     #>
     param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline = $true)]
-        [ValidateNotNullOrEmpty()]
-        [ValidateScript({
-                # Check for invalid characters
-                $invalidChars = [IO.Path]::GetInvalidPathChars()
-                if ($_.IndexOfAny($invalidChars) -ge 0) {
-                    throw "Path contains invalid characters: $_"
-                }
-            
-                # Check path length
-                if ($_.Length -gt 260) {
-                    throw "Path too long (max 260 characters): $_"
-                }
-            
-                # Check for dangerous system paths
-                $dangerousPaths = @(
-                    $env:WINDIR,
-                    $env:PROGRAMFILES,
-                    $env:PROGRAMFILES_X86,
-                    "C:\\",
-                    "\\\\",
-                    $env:USERPROFILE
-                )
-            
-                foreach ($dangerPath in $dangerousPaths) {
-                    if ($dangerPath -and $_.StartsWith($dangerPath, [StringComparison]::OrdinalIgnoreCase)) {
-                        throw "Dangerous path detected: $_. Removing system directories is not allowed."
-                    }
-                }
-            
-                $true
-            })]
         [string[]]
         $Path,
-        
+
         [Parameter()]
         [switch]
         $DryRun,
-        
+
         [Parameter()]
         [switch]
-        $Confirm
+        $Force
     )
-    
-    begin {
-        Write-Verbose "Starting folder removal operation"
-    }
-    
+
     process {
+        $protected = @($env:WINDIR, $env:ProgramFiles, ${env:ProgramFiles(x86)}) | Where-Object { $_ }
+
         foreach ($folderPath in $Path) {
-            try {
-                Write-Verbose "Processing folder: $folderPath"
-                
-                # Resolve full path
-                $resolvedPath = Resolve-Path $folderPath -ErrorAction SilentlyContinue
-                if (-not $resolvedPath) {
-                    Write-Warning "Folder does not exist: $folderPath"
+            if (-not (Test-Path -LiteralPath $folderPath -PathType Container)) {
+                Write-Error "Not a folder: $folderPath"
+                continue
+            }
+
+            # Check the resolved path so relative paths get the same protection as absolute ones
+            $fullPath = (Resolve-Path -LiteralPath $folderPath).ProviderPath.TrimEnd('\')
+            $isRoot = $fullPath -eq ([IO.Path]::GetPathRoot($fullPath)).TrimEnd('\')
+            $isProtected = $protected | Where-Object { $fullPath -eq $_ -or $fullPath.StartsWith("$_\", [StringComparison]::OrdinalIgnoreCase) }
+            if ($isRoot -or $fullPath -eq $env:USERPROFILE -or $isProtected) {
+                Write-Error "Refusing to remove: $fullPath"
+                continue
+            }
+
+            $items = Get-ChildItem -LiteralPath $fullPath -Recurse -Force -ErrorAction SilentlyContinue
+            $sizeMB = [math]::Round(($items | Measure-Object -Property Length -Sum).Sum / 1MB, 2)
+            $summary = "$fullPath ($($items.Count) items, $sizeMB MB)"
+
+            if ($DryRun) {
+                Write-Output "DRY RUN: Would remove $summary"
+                continue
+            }
+
+            if (-not $Force) {
+                $choice = Read-Host "Permanently delete $summary? (y/N)"
+                if ($choice -notmatch '^[Yy]') {
+                    Write-Output "Cancelled: $fullPath"
                     continue
                 }
-                
-                $fullPath = $resolvedPath.Path
-                Write-Verbose "Resolved path: $fullPath"
-                
-                # Check if it's actually a directory
-                $itemInfo = Get-Item $fullPath
-                if ($itemInfo -isnot [System.IO.DirectoryInfo]) {
-                    Write-Error "Path is not a directory: $fullPath"
-                    continue
-                }
-                
-                # Get folder statistics
-                $stats = Get-ChildItem $fullPath -Recurse -ErrorAction SilentlyContinue | Measure-Object
-                $fileCount = $stats.Count
-                $size = (Get-ChildItem $fullPath -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
-                
-                Write-Verbose "Folder contains $fileCount items, total size: $([math]::Round($size / 1MB, 2)) MB"
-                
-                if ($DryRun) {
-                    Write-Host "DRY RUN: Would remove folder: $fullPath" -ForegroundColor Yellow
-                    Write-Host "  Files: $fileCount, Size: $([math]::Round($size / 1MB, 2)) MB" -ForegroundColor Yellow
-                    continue
-                }
-                
-                # Confirmation logic
-                if (-not $Confirm -and -not $PSCmdlet.ShouldProcess($fullPath, "Remove folder and all contents")) {
-                    Write-Output "Folder removal cancelled: $fullPath"
-                    continue
-                }
-                
-                if (-not $Confirm) {
-                    Write-Warning "This will permanently delete the folder '$fullPath' and all its contents."
-                    Write-Warning "Files: $fileCount, Size: $([math]::Round($size / 1MB, 2)) MB"
-                    $choice = Read-Host "Are you sure you want to continue? (y/N)"
-                    
-                    if ($choice -notmatch '^[Yy]') {
-                        Write-Output "Folder removal cancelled: $fullPath"
-                        continue
-                    }
-                }
-                
-                # Attempt removal
-                Write-Verbose "Removing folder: $fullPath"
-                Remove-Item -Path $fullPath -Recurse -Force -ErrorAction Stop
-                Write-Output "Successfully removed folder: $fullPath"
-                Write-Verbose "Removed $fileCount items, freed $([math]::Round($size / 1MB, 2)) MB"
             }
-            catch [System.UnauthorizedAccessException] {
-                Write-Error "Access denied: Cannot remove folder '$folderPath'. Check permissions or if files are in use."
-                Write-Warning "Try running as administrator or closing any programs using files in the folder."
-            }
-            catch [System.IO.IOException] {
-                Write-Error "IO error: Cannot remove folder '$folderPath'. Files may be in use or path too long."
-                Write-Warning "Close any programs that might be using files in this folder."
-            }
-            catch {
-                Write-Error "Unexpected error removing folder '$folderPath': $($_.Exception.Message)"
-            }
+
+            Remove-Item -LiteralPath $fullPath -Recurse -Force
+            Write-Output "Removed: $fullPath"
         }
-    }
-    
-    end {
-        Write-Verbose "Folder removal operation completed"
     }
 }
 
@@ -1374,132 +934,20 @@ function Set-LocationDev {
     .SYNOPSIS
         Changes directory to the development folder.
     .DESCRIPTION
-        Navigates to the development directory defined in the $workspace variable.
-    The $workspace variable is automatically set to the parent of the script's grandparent directory.
+        Navigates to the development directory defined in the $workspace variable
+        (the folder that contains this settings repo).
     .PARAMETER Path
         Alternative path to navigate to (overrides $workspace).
-    .PARAMETER Create
-        Create directory if it doesn't exist.
     .EXAMPLE
         Set-LocationDev
         Changes to the development directory
-    .EXAMPLE
-        Set-LocationDev -Path "C:\Projects" -Create
-        Creates and navigates to C:\Projects
     #>
-    [CmdletBinding()]
     param(
         [Parameter()]
-        [ValidateScript({
-                if ([string]::IsNullOrWhiteSpace($_)) {
-                    return $true  # Allow empty to use $workspace
-                }
-            
-                # Check for invalid characters
-                $invalidChars = [IO.Path]::GetInvalidPathChars()
-                if ($_.IndexOfAny($invalidChars) -ge 0) {
-                    throw "Path contains invalid characters: $_"
-                }
-            
-                # Check path length
-                if ($_.Length -gt 260) {
-                    throw "Path too long (max 260 characters): $_"
-                }
-            
-                $true
-            })]
         [string]
-        $Path = "",
-        
-        [Parameter()]
-        [switch]
-        $Create
+        $Path = $workspace
     )
-    
-    try {
-        # Determine target path
-        $targetPath = if ([string]::IsNullOrWhiteSpace($Path)) {
-            $workspace
-        }
-        else {
-            $Path
-        }
-        
-        Write-Verbose "Attempting to change to directory: $targetPath"
-        
-        # Check if target path is set
-        if ([string]::IsNullOrWhiteSpace($targetPath)) {
-            Write-Error "No target path specified and \$workspace is not set"
-            Write-Warning "Check the VARIABLES section at the top of the profile or provide -Path parameter"
-            return
-        }
-        
-        # Check if directory exists
-        if (-not (Test-Path $targetPath)) {
-            if ($Create) {
-                Write-Verbose "Creating directory: $targetPath"
-                try {
-                    New-Item -Path $targetPath -ItemType Directory -Force -ErrorAction Stop | Out-Null
-                    Write-Output "Created directory: $targetPath"
-                }
-                catch {
-                    Write-Error "Failed to create directory '$targetPath': $($_.Exception.Message)"
-                    return
-                }
-            }
-            else {
-                Write-Error "Directory does not exist: $targetPath"
-                Write-Warning "The directory may have been moved or deleted"
-                Write-Warning "Current \$workspace value: $workspace"
-                
-                # Try to suggest possible locations
-                $parentDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-                Write-Warning "Profile location: $parentDir"
-                Write-Warning "Consider updating the \$workspace variable in the profile or use -Create switch"
-                return
-            }
-        }
-        
-        # Resolve full path
-        $resolvedPath = Resolve-Path $targetPath -ErrorAction Stop
-        Write-Verbose "Resolved path: $resolvedPath"
-        
-        # Check if it's actually a directory
-        $pathInfo = Get-Item $resolvedPath
-        if ($pathInfo -isnot [System.IO.DirectoryInfo]) {
-            Write-Error "Path is not a directory: $resolvedPath"
-            return
-        }
-        
-        # Check if we can access the directory
-        try {
-            $testAccess = Get-ChildItem $resolvedPath -ErrorAction Stop | Select-Object -First 1
-        }
-        catch {
-            Write-Warning "Cannot access directory contents: $resolvedPath"
-        }
-        
-        # Change location
-        Set-Location $resolvedPath -ErrorAction Stop
-        Write-Verbose "Changed to directory: $resolvedPath"
-        
-        # Show current location for confirmation
-        Write-Verbose "Current location: $(Get-Location)"
-        
-        # Show directory info
-        $itemCount = (Get-ChildItem $resolvedPath -ErrorAction SilentlyContinue).Count
-        Write-Verbose "Directory contains $itemCount items"
-        
-        # Return directory info
-        # return Get-Item $resolvedPath
-    }
-    catch [System.UnauthorizedAccessException] {
-        Write-Error "Access denied: Cannot access directory '$targetPath'"
-        Write-Warning "Check directory permissions or run as administrator"
-    }
-    catch {
-        Write-Error "Unexpected error changing to directory '$targetPath': $($_.Exception.Message)"
-    }
+    Set-Location $Path
 }
 
 function sym { cmd.exe /c mklink /H $args }
@@ -1508,16 +956,16 @@ function lt { eza --icons --tree --level=2 $args }
 
 <#
 .SYNOPSIS
-    Creates symbolic links and enhanced directory listings.
+    Creates hard links and enhanced directory listings.
 
 .DESCRIPTION
-    sym: Creates hard symbolic links using cmd.exe mklink.
+    sym: Creates hard links using cmd.exe mklink /H.
     ls: Enhanced directory listing with icons using eza.
     lt: Enhanced tree view listing with icons (2 levels deep) using eza.
 
 .EXAMPLE
-    sym target.txt link.txt
-    Creates a hard link from link.txt to target.txt
+    sym link.txt target.txt
+    Creates a hard link link.txt pointing at target.txt
     
     ls
     Shows current directory with icons
@@ -1525,6 +973,14 @@ function lt { eza --icons --tree --level=2 $args }
     lt
     Shows current directory as tree with icons (2 levels)
 #>
+
+function ssh-list {
+    <#
+    .SYNOPSIS
+        Lists the host names defined in ~/.ssh/config.
+    #>
+    Select-String -Pattern "^Host\s+(\S+)" ~\.ssh\config | ForEach-Object { $_.Matches[0].Groups[1].Value }
+}
 
 function Update-NodeApp {
     <#
@@ -1537,213 +993,7 @@ function Update-NodeApp {
         Update-NodeApp
         Updates all dependencies in package.json to latest versions
     #>
-    Invoke-Expression "npx npm-check-updates -u"
-}
-
-# ============================================================================
-# TESTING & VALIDATION
-# ============================================================================
-
-function Test-ProfileFunctions {
-    <#
-    .SYNOPSIS
-        Tests critical profile functions to validate error handling.
-    .DESCRIPTION
-        Performs basic tests on key functions to ensure error handling works correctly.
-        Tests file operations, directory operations, and basic functionality.
-    .EXAMPLE
-        Test-ProfileFunctions
-        Runs all available tests and reports results
-    #>
-    
-    $testResults = @()
-    $testFiles = @()
-    
-    Write-Host "=== Profile Function Tests ===" -ForegroundColor Cyan
-    
-    try {
-        # Test 1: New-File with invalid name
-        Write-Host "\nTest 1: New-File with invalid characters" -ForegroundColor Yellow
-        try {
-            New-File "test<>file.txt" -ErrorAction Stop
-            $testResults += "FAIL: New-File invalid chars: Should have failed"
-        }
-        catch {
-            $testResults += "PASS: New-File invalid chars: Correctly rejected"
-        }
-        
-        # Test 2: New-File with valid name and new parameters
-        Write-Host "Test 2: New-File with enhanced parameters" -ForegroundColor Yellow
-        $testFile = "test_profile_$(Get-Random).txt"
-        try {
-            $result = New-File $testFile -Extension ".txt" -Force -ErrorAction Stop
-            if (Test-Path $testFile) {
-                $testResults += "PASS: New-File enhanced params: Success"
-                $testFiles += $testFile
-            }
-            else {
-                $testResults += "FAIL: New-File enhanced params: File not created"
-            }
-        }
-        catch {
-            $testResults += "FAIL: New-File enhanced params: Unexpected error - $($_.Exception.Message)"
-        }
-        
-        # Test 3: Remove-Folder with validation
-        Write-Host "Test 3: Remove-Folder parameter validation" -ForegroundColor Yellow
-        try {
-            # Test dangerous path detection
-            Remove-Folder $env:WINDIR -Confirm -ErrorAction Stop
-            $testResults += "FAIL: Remove-Folder dangerous path: Should have failed"
-        }
-        catch {
-            $testResults += "PASS: Remove-Folder dangerous path: Correctly rejected"
-        }
-        
-        # Test 4: Remove-Folder dry run
-        Write-Host "Test 4: Remove-Folder dry run" -ForegroundColor Yellow
-        $testFolder = "test_folder_$(Get-Random)"
-        try {
-            New-Item -Path $testFolder -ItemType Directory -Force | Out-Null
-            Remove-Folder $testFolder -DryRun -ErrorAction Stop
-            $testResults += "PASS: Remove-Folder dry run: Success"
-            # Clean up
-            Remove-Item $testFolder -Recurse -Force -ErrorAction SilentlyContinue
-        }
-        catch {
-            $testResults += "FAIL: Remove-Folder dry run: Error - $($_.Exception.Message)"
-        }
-        
-        # Test 5: Connect-Wifi parameter validation
-        Write-Host "Test 5: Connect-Wifi parameter validation" -ForegroundColor Yellow
-        try {
-            # Test invalid network name (too long)
-            Connect-Wifi "$( 'a' * 50 )" -ErrorAction Stop
-            $testResults += "FAIL: Connect-Wifi long name: Should have failed"
-        }
-        catch {
-            $testResults += "PASS: Connect-Wifi long name: Correctly rejected"
-        }
-        
-        # Test 6: Get-GitSSH parameter validation
-        Write-Host "Test 6: Get-GitSSH parameter validation" -ForegroundColor Yellow
-        try {
-            # Test invalid project name
-            Get-GitSSH "invalid<>project" -ErrorAction Stop
-            $testResults += "FAIL: Get-GitSSH invalid name: Should have failed"
-        }
-        catch {
-            $testResults += "PASS: Get-GitSSH invalid name: Correctly rejected"
-        }
-        
-        # Test 7: Push-Git parameter validation
-        Write-Host "Test 7: Push-Git parameter validation" -ForegroundColor Yellow
-        try {
-            # Test empty message
-            Push-Git "" -ErrorAction Stop
-            $testResults += "FAIL: Push-Git empty message: Should have failed"
-        }
-        catch {
-            $testResults += "PASS: Push-Git empty message: Correctly rejected"
-        }
-        
-        # Test 8: Set-LocationDev parameter validation
-        Write-Host "Test 8: Set-LocationDev parameter validation" -ForegroundColor Yellow
-        try {
-            # Test invalid path
-            Set-LocationDev -Path "invalid<>path" -ErrorAction Stop
-            $testResults += "FAIL: Set-LocationDev invalid path: Should have failed"
-        }
-        catch {
-            $testResults += "PASS: Set-LocationDev invalid path: Correctly rejected"
-        }
-        
-        # Test 9: Set-LocationDev with create option
-        Write-Host "Test 9: Set-LocationDev create option" -ForegroundColor Yellow
-        $testDir = "test_dir_$(Get-Random)"
-        try {
-            Set-LocationDev -Path $testDir -Create -ErrorAction Stop
-            if (Test-Path $testDir) {
-                $testResults += "PASS: Set-LocationDev create: Success"
-                # Clean up
-                Remove-Item $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-            else {
-                $testResults += "FAIL: Set-LocationDev create: Directory not created"
-            }
-        }
-        catch {
-            $testResults += "FAIL: Set-LocationDev create: Error - $($_.Exception.Message)"
-        }
-        
-        # Test 5: Git functions (if in git repo)
-        Write-Host "Test 5: Git functions" -ForegroundColor Yellow
-        $gitDir = git rev-parse --git-dir 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            try {
-                # Test Open-Origin (should not fail if origin exists)
-                $url = git remote get-url origin 2>$null
-                if ($LASTEXITCODE -eq 0) {
-                    $testResults += "PASS: Git environment: Repository detected"
-                }
-                else {
-                    $testResults += "SKIP: Git environment: No origin remote"
-                }
-            }
-            catch {
-                $testResults += "SKIP: Git environment: Error checking - $($_.Exception.Message)"
-            }
-        }
-        else {
-            $testResults += "SKIP: Git environment: Not in git repository"
-        }
-        
-        # Test 6: Network functions (basic validation)
-        Write-Host "Test 6: Network functions validation" -ForegroundColor Yellow
-        try {
-            # Test Find-WifiKey with empty name (should not crash)
-            Find-WifiKey "" 2>$null | Out-Null
-            $testResults += "PASS: Network functions: Basic validation passed"
-        }
-        catch {
-            $testResults += "PASS: Network functions: Error handling working"
-        }
-        
-    }
-    catch {
-        $testResults += "FAIL: Test suite error: $($_.Exception.Message)"
-    }
-    finally {
-        # Cleanup test files
-        Write-Host "\nCleaning up test files..." -ForegroundColor Gray
-        foreach ($file in $testFiles) {
-            if (Test-Path $file) {
-                Remove-Item $file -Force -ErrorAction SilentlyContinue
-            }
-        }
-    }
-    
-    # Display results
-    Write-Host "\n=== Test Results ===" -ForegroundColor Cyan
-    foreach ($result in $testResults) {
-        if ($result.StartsWith("PASS:")) {
-            Write-Host $result -ForegroundColor Green
-        }
-        elseif ($result.StartsWith("FAIL:")) {
-            Write-Host $result -ForegroundColor Red
-        }
-        else {
-            Write-Host $result -ForegroundColor Yellow
-        }
-    }
-    
-    $passed = ($testResults | Where-Object { $_.StartsWith("PASS:") }).Count
-    $failed = ($testResults | Where-Object { $_.StartsWith("FAIL:") }).Count
-    $skipped = ($testResults | Where-Object { $_.StartsWith("SKIP:") }).Count
-    
-    Write-Host "\nSummary: $passed passed, $failed failed, $skipped skipped" -ForegroundColor Cyan
-    
-    return $testResults
+    npx npm-check-updates -u
 }
 
 # ============================================================================
@@ -1752,42 +1002,30 @@ function Test-ProfileFunctions {
 
 Set-Alias b Open-DefaultBrowser
 Set-Alias bd Get-DefaultBrowserPath
-# Set-Alias bi "bun install"
+Set-Alias cc claude
 Set-Alias cd z
 Set-Alias clone Get-GitSSH
 Set-Alias connect Connect-Wifi
-Set-Alias cc claude
 Set-Alias dev Set-LocationDev
 Set-Alias disconnect Disconnect-Wifi
 Set-Alias e explorer.exe
 Set-Alias hist Search-History
-Set-Alias lzc lazycurl
-Set-Alias lzd lazydocker
-Set-Alias lzg lazygit
-Set-Alias lzs lazysql
 Set-Alias init New-NodeApp
 Set-Alias ip Get-Ip
 Set-Alias key Find-WifiKey
 Set-Alias keygen ssh-keygen
+Set-Alias lzc lazycurl
+Set-Alias lzd lazydocker
+Set-Alias lzg lazygit
+Set-Alias lzs lazysql
 Set-Alias mklink sym
 Set-Alias o Open-Origin
 Set-Alias pid Find-FromPort
 Set-Alias port Find-Port
-Set-Alias pum Update-PythonModules
 Set-Alias push Push-Git
 Set-Alias rl railway
-set-alias rmdir remove-folder
+Set-Alias rmdir Remove-Folder
 Set-Alias ssh_url Find-HTTPSUrl
 Set-Alias storage Get-Storage
-Set-Alias swap Edit-Policy
-Set-Alias surf windsurf
 Set-Alias touch New-File
-Set-Alias unlock Get-OfficeKey
 Set-Alias update Update-NodeApp
-Set-Alias v nvim.exe
-Set-Alias vim nvim.exe
-Set-Alias w winget
-
-function ssh-list {
-    Select-String -Pattern "^Host\s+(\S+)" ~\.ssh\config | ForEach-Object { $_.Matches[0].Groups[1].Value };
-  }
