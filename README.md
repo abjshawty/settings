@@ -4,13 +4,14 @@ This is a collection of scripts that i use in my daily life. These scripts are u
 
 Do not clone this to a shared workstation, as it contains much private data.
 
+This repo covers my Windows machine. My Arch / Omarchy setup lives in [linux-settings](https://github.com/abjshawty/linux-settings).
+
 ## Structure
 
 ```
 settings/
 ├── data/
 │   └── apps.md          # Windows apps by category: winget, cargo, go, manual downloads
-├── linux/               # Arch / Omarchy setup (see linux/README.md)
 ├── lua/
 │   ├── colorscheme.lua  # Neovim colorschemes (LazyVim)
 │   └── .wezterm.lua     # WezTerm terminal config (Windows)
