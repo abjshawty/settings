@@ -25,7 +25,7 @@ function Install-AppsFromList {
         Write-Host "Starting application installation from: $AppsFile" -ForegroundColor Green
         
         # Get the settings directory (parent of powershell directory)
-        $settingsDir = Split-Path (Split-Path $MyInvocation.MyCommand.Definition) -Parent
+        $settingsDir = Split-Path $PSScriptRoot -Parent
         $appsFilePath = Join-Path $settingsDir $AppsFile
         
         if (-not (Test-Path $appsFilePath)) {
@@ -90,7 +90,7 @@ function Initialize-Environment {
     Install-AppsFromList
     
     # Load PowerShell profile
-    $profilePath = Join-Path (Split-Path $MyInvocation.MyCommand.Definition) "profile.ps1"
+    $profilePath = Join-Path $PSScriptRoot "profile.ps1"
     if (Test-Path $profilePath) {
         Write-Host "Loading PowerShell profile..." -ForegroundColor Yellow
         . $profilePath

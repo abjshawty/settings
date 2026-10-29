@@ -55,12 +55,10 @@ winget install --id cjpais.Handy -e
 | App | ID | Description |
 | --- | --- | --- |
 | Neovim | `Neovim.Neovim` | Modal text editor (LazyVim config) |
-| Windsurf | `Codeium.Windsurf` | AI-first editor based on VS Code |
 | Zed | `ZedIndustries.Zed` | Fast native editor written in Rust |
 
 ```powershell
 winget install --id Neovim.Neovim -e
-winget install --id Codeium.Windsurf -e
 winget install --id ZedIndustries.Zed -e
 ```
 

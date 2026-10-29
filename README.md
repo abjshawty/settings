@@ -9,21 +9,21 @@ Do not clone this to a shared workstation, as it contains much private data.
 ```
 settings/
 ├── data/
-│   └── apps.md    # All apps by category: winget, cargo, go, manual downloads
-├── lua/           # Terminal and editor configs
+│   └── apps.md          # Windows apps by category: winget, cargo, go, manual downloads
+├── linux/               # Arch / Omarchy setup (see linux/README.md)
+├── lua/
 │   ├── colorscheme.lua  # Neovim colorschemes (LazyVim)
-│   └── .wezterm.lua     # WezTerm terminal config
-├── omarchy/       # Omarchy hooks
-│   ├── hooks/theme-set.d/  # Make Yaak and Spotify follow the Omarchy theme
-│   └── install-hooks.sh    # Install every hook and apply the current theme
-└── powershell/    # PowerShell profile and scripts
-    ├── init.ps1   # App installer from data/apps.md
-    └── profile.ps1 # Main profile (~30 functions, 30+ aliases)
+│   └── .wezterm.lua     # WezTerm terminal config (Windows)
+├── powershell/
+│   ├── init.ps1         # Installs every app in data/apps.md, then loads the profile
+│   └── profile.ps1      # Main profile: functions and aliases
+└── rust/
+    └── search/          # `search` CLI: open a search-engine query in the browser
 ```
 
 ## Installed Apps
 
-- **Editors**: Neovim, Claude Code, Codeium Windsurf
+- **Editors**: Neovim, Zed, Claude Code
 - **Languages**: Go, Rust, Python 3.14, Node.js (via NVM)
 - **Dev Tools**: lazygit, lazydocker, lazysql, lazycurl, fzf, bat, eza, glow, tealdeer
 - **Terminal**: WezTerm, oh-my-posh, zoxide, eza
@@ -40,25 +40,16 @@ Find your `$Profile` file via PowerShell, then paste:
 
 Every new powershell instance will now load the scripts on launch.
 
-To install all apps:
-```
-Install-AppsFromList
-```
-
-Or simply run the init script:
+To install all apps from `data/apps.md` and load the profile, run the init script:
 ```
 . $HOME\dev\settings\powershell\init.ps1
 ```
 
-## Omarchy hooks
-
-`omarchy/hooks/<event>.d/` mirrors `~/.config/omarchy/hooks/`. To install them all on a machine and apply the current theme right away:
-
-```sh
-./omarchy/install-hooks.sh
+To build the `search` tool used by the profile's `search` function:
 ```
-
-The `theme-set` hooks need some one-time setup in each app (adding the Yaak plugin, patching Spotify with Spicetify). That's documented in the vault's *Omarchy theme sync* note.
+cd $HOME\dev\settings\rust\search
+cargo build --release
+```
 
 ## Available Functions
 
@@ -66,24 +57,25 @@ Key functions in profile.ps1:
 - `Connect-Wifi` / `Disconnect-Wifi` - WiFi management
 - `Get-GitSSH` - Clone repos from GitHub via SSH
 - `Push-Git` - Add, commit, and push in one command
+- `Open-Origin` - Open the current repo's remote in the browser
 - `New-NodeApp` - Scaffold new Node projects (React, Vue, Svelte, Next, etc.)
-- `New-File` / `Remove-Folder` - File operations with validation
+- `New-File` / `Remove-Folder` - Create (or touch) files, delete folders with a confirmation
 - `Set-LocationDev` - Navigate to dev workspace
 - `Find-WifiKey` - Retrieve saved WiFi passwords
+- `search` - Search the web from the terminal (`search --help`)
 
 Key aliases:
-- `v` / `vim` - nvim
-- `lzg` - lazygit
-- `lzd` - lazydocker
+- `n` - nvim (opens the current folder with no arguments)
+- `lzg` / `lzd` / `lzs` / `lzc` - lazygit / lazydocker / lazysql / lazycurl
 - `cd` - zoxide
-- `surf` - windsurf
-- `win` - winget
+- `win` - `winget update --all`, or `winget install` with arguments
 - `dev` - Set-LocationDev
+- `hist` - Search command history
+- `b` - Open a URL in the default browser
 
 ## Terminal Setup
 
 - **Shell**: PowerShell 7+ via WezTerm
 - **Prompt**: oh-my-posh with "material" theme
-- **Theme**: Matte Black (WezTerm + Neovim)
+- **Theme**: Dark Ocean (WezTerm), Matte Black (Neovim)
 - **Icons**: eza for directory listings
-

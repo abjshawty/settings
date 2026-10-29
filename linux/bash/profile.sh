@@ -11,6 +11,7 @@ export WORKSPACE="${HOME}/Projects"
 
 if command -v zoxide &>/dev/null; then
   eval "$(zoxide init bash)"
+  alias cd='z'
 fi
 
 if command -v oh-my-posh &>/dev/null; then
@@ -19,18 +20,8 @@ if command -v oh-my-posh &>/dev/null; then
 fi
 
 # ============================================================================
-# CLEANUP
-# ============================================================================
-
-unset -f ls cd curl 2>/dev/null
-
-# ============================================================================
 # FUNCTIONS
 # ============================================================================
-
-update_python_modules() {
-  pip list --format=json | python3 -c "import sys, json; [__import__('subprocess').run(['pip', 'install', '--upgrade', p['name']]) for p in json.load(sys.stdin)]"
-}
 
 connect_wifi() {
   local ssid="$1"
@@ -54,7 +45,7 @@ find_from_port() {
   if command -v lsof &>/dev/null; then
     lsof -i :"$port"
   else
-    netstat -tlnp 2>/dev/null | grep ":$port"
+    ss -tulnp "( sport = :$port )"
   fi
 }
 
@@ -64,7 +55,8 @@ find_https_url() {
     echo "Usage: find_https_url <git@github.com:user/repo.git>"
     return 1
   fi
-  echo "$url" | sed 's|:|/|g' | sed 's|git@|https://|'
+  # Only scp-style (git@host:path) and ssh:// URLs are rewritten; HTTPS passes through
+  echo "$url" | sed -E 's#^(ssh://)?git@([^:/]+)[:/]#https://\2/#'
 }
 
 find_port() {
@@ -73,12 +65,7 @@ find_port() {
     echo "Usage: find_port <pid>"
     return 1
   fi
-  if command -v lsof &>/dev/null; then
-    lsof -i -P -n 2>/dev/null | grep "^python3.*$pid" | awk '{print $9}' | cut -d':' -f2 | sort -u
-  else
-    echo "lsof not available"
-    return 1
-  fi
+  ss -tulnpH | grep "pid=$pid," | awk '{print $5}' | sed 's/.*://' | sort -u
 }
 
 get_ip() {
@@ -87,6 +74,10 @@ get_ip() {
 
 get_storage() {
   df -h / | tail -1
+}
+
+n() {
+  nvim "${@:-.}"
 }
 
 new_file() {
@@ -100,7 +91,7 @@ new_file() {
   fi
 
   local filename="$name"
-  if [[ -n "$extension" && "$name" != *"$extension"* ]]; then
+  if [[ -n "$extension" && "$name" != *"$extension" ]]; then
     filename="$name$extension"
   fi
 
@@ -112,7 +103,6 @@ new_file() {
 new_nodeapp() {
   local framework="$1"
   local name="${2:-.}"
-  local package_manager="${3:-yarn}"
 
   local -A commands=(
     ["react"]="npm create vite@latest $name -- --template react-ts"
@@ -151,21 +141,20 @@ set_location_dev() {
 }
 
 remove_folder() {
-  local path="$1"
   local dry_run=false
-
-  if [[ "$path" == "--dry-run" ]]; then
-    shift
+  if [[ "$1" == "--dry-run" ]]; then
     dry_run=true
+    shift
   fi
 
+  local path="$1"
   if [[ -z "$path" ]]; then
     echo "Usage: remove_folder [--dry-run] <path>"
     return 1
   fi
 
   local full_path
-  full_path=$(realpath "$path" 2>/dev/null)
+  full_path=$(realpath -e "$path" 2>/dev/null)
 
   if [[ -z "$full_path" ]]; then
     echo "Path does not exist: $path"
@@ -194,21 +183,13 @@ remove_folder() {
 # ALIASES
 # ============================================================================
 
-alias cd='z' 2>/dev/null || true
-alias ls='eza --icons'
-alias ll='eza -l --icons'
-alias lt='eza --tree --icons -L 2'
-alias la='eza -la --icons'
-alias ip='get_ip'
+if command -v eza &>/dev/null; then
+  alias ls='eza --icons'
+  alias ll='eza -l --icons'
+  alias lt='eza --tree --icons -L 2'
+  alias la='eza -la --icons'
+fi
+
 alias dev='set_location_dev'
-alias search='search_history'
+alias hist='search_history'
 alias s='pacman -Ssq | fzf | xargs -o sudo pacman -S'
-
-if command -v nvim &>/dev/null; then
-  alias v='nvim'
-  alias vim='nvim'
-fi
-
-if command -v lsd &>/dev/null; then
-  alias ls='lsd --icon always'
-fi

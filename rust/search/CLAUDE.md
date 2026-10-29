@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 A Rust CLI (`search`) that builds search-engine query URLs and opens them in the
-default browser. It does **not** perform HTTP requests itself — it delegates the
-actual "open a URL" step to the user's `b` command (see Browser integration).
+default browser. It does **not** perform HTTP requests itself — it hands the URL
+to the OS URL handler (see Browser integration). Runs on Windows and Linux.
 
 The whole tool lives in `src/main.rs` (hand-rolled, zero dependencies).
 
@@ -32,7 +32,8 @@ cargo fmt                # format
 - **The default is modifiable and persisted.** `search --set-default <engine>`
   writes the chosen engine to a config file so future naked `search ...` calls
   use it. Config lives at `%APPDATA%\search\config` (fallback
-  `%USERPROFILE%\.search\config`), format `default = <key>`. A missing/invalid
+  `%USERPROFILE%\.search\config`) on Windows and `$XDG_CONFIG_HOME/search/config`
+  (fallback `~/.config/search/config`) on Linux, format `default = <key>`. A missing/invalid
   config falls back to `INITIAL_DEFAULT`.
 - **Each engine is selectable via a flag.** Any `--<key>` or `--<alias>`
   overrides the default for one call (e.g. `-g` / `--google`).
@@ -44,10 +45,10 @@ cargo fmt                # format
 Currently implemented engines, grouped by their `category` (which drives the
 `--help` / `--list` grouping):
 - **Google** (default)
-- Sprint 1 (general web): **Brave** (`br`), **DuckDuckGo** (`dg`), **Ecosia** (`ec`)
-- Sprint 2 (AI): **Perplexity** (`px`, `pplx`), **ChatGPT** (`gpt`), **Claude** (`cl`)
-- Sprint 3 (dev): **GitHub** (`gh`), **GitLab** (`gl`), **Docker Hub** (`dh`, `docker`), **npm** (`np`)
-- Sprint 4 (community/ref): **YouTube** (`yt`), **Reddit** (`rd`), **Wikipedia** (`wiki`, `wp`)
+- General web: **Brave** (`br`), **DuckDuckGo** (`dg`), **Ecosia** (`ec`)
+- AI assistants: **Perplexity** (`px`, `pplx`), **ChatGPT** (`gpt`), **Claude** (`cl`)
+- Developer: **GitHub** (`gh`), **GitLab** (`gl`), **Docker Hub** (`dh`, `docker`), **npm** (`np`)
+- Community & reference: **YouTube** (`yt`), **Reddit** (`rd`), **Wikipedia** (`wiki`, `wp`)
 
 Note the AI engines' query params (`chatgpt.com/?q=`, `claude.ai/new?q=`,
 `perplexity.ai/search?q=`) seed a chat/answer and may require login; if a site
@@ -69,37 +70,26 @@ tests in `main.rs` cover encoding, URL building, and engine lookup, plus a
 template has `{q}`, non-empty `category`, `INITIAL_DEFAULT` resolves) — add a
 per-engine `build_url` test when you add an engine.
 
-## Browser integration (the `b` command)
+## Browser integration
 
-URLs are opened by shelling out to `b`, a PowerShell alias defined in the user's
-profile at `D:\settings\powershell\profile.ps1`:
+`open_in_browser` spawns the platform URL handler directly, with the URL as a
+single argument and no shell in between:
 
-```powershell
-Set-Alias b Open-DefaultBrowser     # Open-DefaultBrowser -Url <url>
-```
+- Windows: `rundll32 url.dll,FileProtocolHandler <url>`
+- Linux: `xdg-open <url>`
 
-`Open-DefaultBrowser` reads the Windows registry
-(`HKCU:\...\UrlAssociations\http\UserChoice`) to find the default browser
-executable and launches it with the URL.
-
-The whole `D:\settings` profile is dot-sourced into the user's PowerShell
-profile, so `b` (and the other functions/aliases) are available directly in any
-profile-loading shell. Because `b` is a PowerShell function alias (not an
-`.exe` on PATH), invoking it from Rust means running it through PowerShell —
-e.g. `pwsh -c "b '<url>'"` — rather than spawning `b` directly. Note `pwsh
--Command` loads the profile by default (don't pass `-NoProfile`, or `b` won't
-be defined).
+Both open the URL in the user's default browser.
 
 ## Toolbelt wiring
 
-This is a personal tool exposed through the settings PowerShell toolbelt. A
-`search` function in `D:\settings\powershell\profile.ps1` forwards args to the
-**release** binary:
+On Windows, a `search` function in `powershell/profile.ps1` of the settings repo
+forwards args to the **release** binary:
 
 ```powershell
-function search { & 'D:/personal/search/target/release/search.exe' @args }
+function search { & "$PSScriptRoot/../rust/search/target/release/search.exe" @args }
 ```
 
 So after changing the Rust code you must `cargo build --release` for the toolbelt
-`search` to pick it up. The profile's old history-search alias was renamed from
-`search` to `hist`, freeing the `search` name for this tool.
+`search` to pick it up. On Linux, install it onto PATH with
+`cargo install --path .`. The profiles' history-search alias is `hist`, leaving
+the `search` name for this tool.

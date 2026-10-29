@@ -7,8 +7,9 @@
 //!
 //! Flow: parse the args into an optional engine override plus a free-text
 //! query, build the URL by percent-encoding the query into the engine's
-//! `template`, then hand that URL to PowerShell's `b` (Open-DefaultBrowser) to
-//! launch it. The chosen default engine is persisted in a small config file.
+//! `template`, then hand that URL to the OS URL handler (`xdg-open` on Linux,
+//! the shell's URL protocol handler on Windows) so it opens in the default
+//! browser. The chosen default engine is persisted in a small config file.
 
 use std::env;
 use std::fs;
@@ -245,27 +246,38 @@ fn find_engine(name: &str) -> Option<&'static Engine> {
         .find(|e| e.key == name || e.aliases.contains(&name.as_str()))
 }
 
-/// Hand the URL to PowerShell's `b` (Open-DefaultBrowser from the settings
-/// profile). The profile is dot-sourced by `pwsh`, so `b` is defined; the URL
-/// is already percent-encoded, so single-quoting it is safe.
+/// Open the URL in the default browser via the OS URL handler. The URL is
+/// passed as a single argument with no shell in between, so `&` and quotes in
+/// it are never reinterpreted.
 fn open_in_browser(url: &str) -> ExitCode {
     println!("opening {url}");
-    let status = Command::new("pwsh")
-        .arg("-c")
-        .arg(format!("b '{url}'"))
-        .status();
+    let status = browser_command(url).status();
 
     match status {
         Ok(s) if s.success() => ExitCode::SUCCESS,
         Ok(s) => {
-            eprintln!("error: `b` exited with {s}");
+            eprintln!("error: the URL handler exited with {s}");
             ExitCode::FAILURE
         }
         Err(e) => {
-            eprintln!("error: could not launch pwsh: {e}");
+            eprintln!("error: could not launch the URL handler: {e}");
             ExitCode::FAILURE
         }
     }
+}
+
+#[cfg(windows)]
+fn browser_command(url: &str) -> Command {
+    let mut cmd = Command::new("rundll32");
+    cmd.args(["url.dll,FileProtocolHandler", url]);
+    cmd
+}
+
+#[cfg(not(windows))]
+fn browser_command(url: &str) -> Command {
+    let mut cmd = Command::new("xdg-open");
+    cmd.arg(url);
+    cmd
 }
 
 /// Resolve the persisted default engine, falling back to INITIAL_DEFAULT if the
@@ -286,7 +298,7 @@ fn set_default(value: &str) -> ExitCode {
     };
 
     let Some(path) = config_path() else {
-        eprintln!("error: could not determine a config location (no APPDATA/USERPROFILE)");
+        eprintln!("error: could not determine a config location");
         return ExitCode::FAILURE;
     };
 
@@ -324,15 +336,24 @@ fn read_default_key() -> String {
     INITIAL_DEFAULT.to_string()
 }
 
-/// `%APPDATA%\search\config`, falling back to `%USERPROFILE%\.search\config`.
+/// Windows: `%APPDATA%\search\config`, falling back to `%USERPROFILE%\.search\config`.
+/// Linux: `$XDG_CONFIG_HOME/search/config`, falling back to `~/.config/search/config`.
 fn config_path() -> Option<PathBuf> {
-    if let Ok(appdata) = env::var("APPDATA") {
-        return Some(PathBuf::from(appdata).join("search").join("config"));
+    let var = |name| {
+        env::var_os(name)
+            .filter(|v| !v.is_empty())
+            .map(PathBuf::from)
+    };
+    if cfg!(windows) {
+        var("APPDATA")
+            .map(|d| d.join("search"))
+            .or_else(|| var("USERPROFILE").map(|d| d.join(".search")))
+            .map(|d| d.join("config"))
+    } else {
+        var("XDG_CONFIG_HOME")
+            .or_else(|| var("HOME").map(|d| d.join(".config")))
+            .map(|d| d.join("search").join("config"))
     }
-    if let Ok(home) = env::var("USERPROFILE") {
-        return Some(PathBuf::from(home).join(".search").join("config"));
-    }
-    None
 }
 
 /// Group the engine table by `category`, preserving the first-seen order of
@@ -449,7 +470,7 @@ mod tests {
         assert!(find_engine("nope").is_none());
     }
 
-    /// C1: invariants that must hold for the whole ENGINES table as it grows.
+    /// Invariants that must hold for the whole ENGINES table as it grows.
     #[test]
     fn engine_table_is_well_formed() {
         let mut seen = std::collections::HashSet::new();
@@ -476,7 +497,7 @@ mod tests {
     }
 
     #[test]
-    fn builds_sprint1_query_urls() {
+    fn builds_general_web_query_urls() {
         let q = "hello world";
         let url = |key: &str| build_url(find_engine(key).unwrap(), q);
         assert_eq!(
@@ -491,14 +512,14 @@ mod tests {
     }
 
     #[test]
-    fn sprint1_aliases_resolve() {
+    fn general_web_aliases_resolve() {
         assert_eq!(find_engine("br").unwrap().key, "brave");
         assert_eq!(find_engine("dg").unwrap().key, "duckduckgo");
         assert_eq!(find_engine("ec").unwrap().key, "ecosia");
     }
 
     #[test]
-    fn builds_sprint2_query_urls() {
+    fn builds_ai_assistant_query_urls() {
         let q = "hello world";
         let url = |key: &str| build_url(find_engine(key).unwrap(), q);
         assert_eq!(
@@ -510,7 +531,7 @@ mod tests {
     }
 
     #[test]
-    fn sprint2_aliases_resolve() {
+    fn ai_assistant_aliases_resolve() {
         assert_eq!(find_engine("px").unwrap().key, "perplexity");
         assert_eq!(find_engine("pplx").unwrap().key, "perplexity");
         assert_eq!(find_engine("gpt").unwrap().key, "chatgpt");
@@ -518,7 +539,7 @@ mod tests {
     }
 
     #[test]
-    fn builds_sprint3_query_urls() {
+    fn builds_developer_query_urls() {
         let q = "hello world";
         let url = |key: &str| build_url(find_engine(key).unwrap(), q);
         assert_eq!(
@@ -537,7 +558,7 @@ mod tests {
     }
 
     #[test]
-    fn sprint3_aliases_resolve() {
+    fn developer_aliases_resolve() {
         assert_eq!(find_engine("gh").unwrap().key, "github");
         assert_eq!(find_engine("gl").unwrap().key, "gitlab");
         assert_eq!(find_engine("dh").unwrap().key, "dockerhub");
@@ -546,7 +567,7 @@ mod tests {
     }
 
     #[test]
-    fn builds_sprint4_query_urls() {
+    fn builds_community_query_urls() {
         let q = "hello world";
         let url = |key: &str| build_url(find_engine(key).unwrap(), q);
         assert_eq!(
@@ -564,7 +585,7 @@ mod tests {
     }
 
     #[test]
-    fn sprint4_aliases_resolve() {
+    fn community_aliases_resolve() {
         assert_eq!(find_engine("yt").unwrap().key, "youtube");
         assert_eq!(find_engine("rd").unwrap().key, "reddit");
         assert_eq!(find_engine("wiki").unwrap().key, "wikipedia");
