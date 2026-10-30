@@ -23,8 +23,8 @@ settings/
 ## Installed Apps
 
 - **Editors**: Neovim, Zed, Claude Code
-- **Languages**: Go, Rust, Python 3.14, Node.js (via NVM)
-- **Dev Tools**: lazygit, lazydocker, lazysql, lazycurl, fzf, bat, eza, glow, tealdeer
+- **Languages**: Rust, Python 3.14, Node.js (via NVM)
+- **Dev Tools**: lazygit, lazydocker, lazysql, lazycurl, fzf, bat, eza, tealdeer
 - **Terminal**: WezTerm, oh-my-posh, zoxide, eza
 - **Databases**: DBX
 - **Misc**: Docker Desktop, Spotify, Discord, Thunderbird, REAPER, Zen Browser

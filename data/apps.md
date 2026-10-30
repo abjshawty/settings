@@ -2,7 +2,7 @@
 
 Everything installed on this machine, grouped by category. Each section ends with a copy-paste block.
 
-Install order matters: **Languages & Toolchains** first (Rust and Go are needed for the Cargo and Go sections), then everything else.
+Install order matters: **Languages & Toolchains** first (Rust is needed for the Cargo section), then everything else.
 
 > `powershell/init.ps1` reads every `winget install` line in this file, so keep one install per line.
 
@@ -12,7 +12,6 @@ Install order matters: **Languages & Toolchains** first (Rust and Go are needed 
 
 | App | ID | Description |
 | --- | --- | --- |
-| Go | `Golang.Go` | Go compiler and toolchain (needed for the Go tools below) |
 | Rustup | `Rustlang.Rustup` | Rust toolchain installer: `rustc`, `cargo` (needed for the Cargo tools below) |
 | Python 3.14 | `Python.Python.3.14` | Python interpreter and `pip` |
 | NVM for Windows | `CoreyButler.NVMforWindows` | Node.js version manager |
@@ -22,7 +21,6 @@ Install order matters: **Languages & Toolchains** first (Rust and Go are needed 
 | VS 2022 Build Tools | `Microsoft.VisualStudio.2022.BuildTools` | MSVC compiler and Windows SDK (C++ workload), required by Rust's MSVC target |
 
 ```powershell
-winget install --id Golang.Go -e
 winget install --id Rustlang.Rustup -e
 winget install --id Python.Python.3.14 -e
 winget install --id CoreyButler.NVMforWindows -e
@@ -96,7 +94,6 @@ winget install --id Termius.Termius -e
 | jq | `jqlang.jq` | Query and transform JSON |
 | zoxide | `ajeetdsouza.zoxide` | Smarter `cd` that learns your folders |
 | tealdeer | `dbrgn.tealdeer` | Fast `tldr` client: short command examples |
-| Glow | `charmbracelet.glow` | Render Markdown in the terminal |
 | Fastfetch | `Fastfetch-cli.Fastfetch` | System info display |
 | btop4win | `aristocratos.btop4win` | Resource monitor (CPU, memory, disks, network) |
 | cURL | `cURL.cURL` | HTTP and transfer tool |
@@ -112,7 +109,6 @@ winget install --id sharkdp.fd -e
 winget install --id jqlang.jq -e
 winget install --id ajeetdsouza.zoxide -e
 winget install --id dbrgn.tealdeer -e
-winget install --id charmbracelet.glow -e
 winget install --id Fastfetch-cli.Fastfetch -e
 winget install --id aristocratos.btop4win -e
 winget install --id cURL.cURL -e
@@ -214,7 +210,7 @@ cargo install tree-sitter-cli
 
 ## Go Tools
 
-Requires **Go**.
+Requires Go, which is not in the install list above: install it separately (`winget install --id Golang.Go -e`) before running these.
 
 | Tool | Description |
 | --- | --- |
